@@ -20,8 +20,33 @@ class TaskManagerController extends Controller
 
     public function actionIndex()
     {
-        $image=Post::find()->all();
-        return $this->render("home",['image'=>$image]);
+        $post = Post::find()->all();
+        $postForUser = [];
+        foreach ($post as $posts) {
+            $userIds = explode(',', $posts->user);// Получаем массив ID пользователей
+
+            // Если нужно, вы можете извлечь информацию о пользователях
+            for ($i = 0; $i < count($userIds); $i++) {
+
+                if (Yii::$app->user->id == $userIds[$i]) {
+                    $postForUser[] = [
+                        'title' => $posts->title,
+                        'text' => $posts->text,
+                        'imagePath' => $posts->imagePath,
+
+                    ];
+
+                }
+            }
+
+
+
+        }
+
+
+
+
+        return $this->render("home", ['task' => $postForUser]);
     }
 
     public function actionSignUp()
@@ -101,7 +126,7 @@ class TaskManagerController extends Controller
     public function actionCreatePost()
     {
         $model = new CreatePostForm();
-        $user = User::find()->select(['id','name','email'])->all();
+        $user = User::find()->select(['id', 'name', 'email'])->all();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $post = new Post();
             $post->title = $model->title;
@@ -109,8 +134,9 @@ class TaskManagerController extends Controller
             $post->user = implode(",", Yii::$app->request->post('user', []));
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
             $filePath = $model->imageFile->baseName . '.' . $model->imageFile->extension;
-            $savePath = Yii::getAlias('@app') . '/web/uploadImage/' . $filePath;;
-            $post->imagePath=$filePath;
+            $savePath = Yii::getAlias('@app') . '/web/uploadImage/' . $filePath;
+            ;
+            $post->imagePath = $filePath;
             // print_r(Yii::$app->request->post('user', []));
 
             if ($post->save() && $model->imageFile->saveAs($savePath)) {
@@ -119,8 +145,8 @@ class TaskManagerController extends Controller
 
             }
 
-        } 
-        
+        }
+
         return $this->render('create-post', ['model' => $model, 'user' => $user]);
     }
 }

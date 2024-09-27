@@ -41,10 +41,10 @@ main>.container {
 .header-menu-link.nav-link {
     /* border: 0.2px solid var(--border-color); */
     color: var(--header-font-color);
-    text-decoration:underline;
+    text-decoration: underline;
 }
 
-.bi{
+.bi {
     width: 20px;
     height: 20px;
 }
@@ -91,6 +91,20 @@ main>.container {
     color: rgba(255, 255, 255, 0.5);
 }
 
+.flex {
+    display: flex;
+    gap: 50px;
+    margin: 20px;
+}
+.img ,img{
+    width: 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg);
+    color: var(--border-color);
+}
 @media(max-width:767px) {
     .nav li>form>button.logout {
         display: block;

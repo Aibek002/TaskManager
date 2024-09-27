@@ -11,4 +11,8 @@ class Post extends ActiveRecord
     {
         return 'post';
     }
+    public function getUserIds()
+    {
+        return explode(',', $this->user); // Преобразуем строку в массив
+    }
 }
