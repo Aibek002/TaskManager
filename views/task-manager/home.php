@@ -14,6 +14,7 @@
             <div class="text">
                 <h5><?php echo $task[$i]['title'] ?></h5>
                 <p><?php echo $task[$i]['text'] ?></p>
+                <a href="<?= Url::to("@web/uploadImage/" . $task[$i]['imagePath'])?>" download="Task">img</a>
 
             </div>
         </div>
