@@ -7,10 +7,11 @@ $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
     'defaultRoute' => 'task-manager/index',
+    'language' => 'ru-RU',
     'bootstrap' => ['log'],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
+        '@npm' => '@vendor/npm-asset',
     ],
     'components' => [
         'request' => [
@@ -20,9 +21,23 @@ $config = [
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
+       
         'user' => [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
+            'loginUrl' => ['task-manager/login'],
+        ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
+        'session' => [
+            'class' => 'yii\web\Session',
+            'name' => 'my-session',
+            'timeout' => 3600, // 1 hour
+            'cookieParams' => [
+                'httpOnly' => true,
+                'secure' => true, // or false, depending on your environment
+            ],
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',

@@ -12,12 +12,13 @@ class SignUpForm extends Model
     public $surname;
     public $email;
     public $password_hash;
-
+    public $roles = []; 
     public function rules()
     {
         return [
             [['name', 'surname', 'email', 'password_hash'], 'required'],
             ['email', 'email'],
+            ['roles', 'safe'],
         ];
     }
 

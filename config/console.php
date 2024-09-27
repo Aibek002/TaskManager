@@ -7,15 +7,19 @@ $config = [
     'id' => 'basic-console',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
-    'controllerNamespace' => 'app\commands',
-    'aliases' => [
-        '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
-        '@tests' => '@app/tests',
+    'controllerNamespace' => 'console\controllers',
+    'controllerMap' => [
+        'rbac' => [
+            'class' => 'console\controllers\RbacController',
+                       // console/controllers/RbacController
+        ],
     ],
     'components' => [
         'cache' => [
             'class' => 'yii\caching\FileCache',
+        ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
         ],
         'log' => [
             'targets' => [
@@ -35,6 +39,7 @@ $config = [
         ],
     ],
     */
+
 ];
 
 if (YII_ENV_DEV) {

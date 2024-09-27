@@ -38,9 +38,15 @@ main>.container {
     gap: 10px;
 }
 
-.header-menu-link.nav-link  {
-    border: 0.2px solid var(--border-color);
+.header-menu-link.nav-link {
+    /* border: 0.2px solid var(--border-color); */
     color: var(--header-font-color);
+    text-decoration:underline;
+}
+
+.bi{
+    width: 20px;
+    height: 20px;
 }
 
 .footer {
