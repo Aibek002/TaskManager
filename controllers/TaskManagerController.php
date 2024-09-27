@@ -106,10 +106,8 @@ class TaskManagerController extends Controller
             $post = new Post();
             $post->title = $model->title;
             $post->text = $model->text;
-            $post->user = implode(",",Yii::$app->request->post('user', []));
+            $post->user = implode(",", Yii::$app->request->post('user', []));
             // print_r(Yii::$app->request->post('user', []));
-
-            // print_r($post);
             if ($post->save()) {
                 Yii::$app->session->setFlash('success', "Successfully saved!");
                 return $this->redirect(['task-manager/create-post']);
