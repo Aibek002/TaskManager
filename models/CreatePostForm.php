@@ -8,13 +8,15 @@ class CreatePostForm extends Model
 
     public $title;
     public $text;
-    public $user=[];
+    public $user = [];
+    public $imageFile;
 
 
     public function rules()
     {
         return [
-            [['title','text'], 'required']
+            [['title', 'text'], 'required'],
+            [['imageFile'], 'file', 'extensions' => 'jpg, png, jpeg', 'maxSize' => 10 * 1024 * 1024],
         ];
     }
 

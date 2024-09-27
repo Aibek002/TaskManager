@@ -11,6 +11,7 @@ use Yii;
 use app\models\Users;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
+use yii\web\UploadedFile;
 
 class TaskManagerController extends Controller
 {
@@ -19,8 +20,8 @@ class TaskManagerController extends Controller
 
     public function actionIndex()
     {
-
-        return $this->render("home");
+        $image=Post::find()->all();
+        return $this->render("home",['image'=>$image]);
     }
 
     public function actionSignUp()
@@ -100,25 +101,26 @@ class TaskManagerController extends Controller
     public function actionCreatePost()
     {
         $model = new CreatePostForm();
-        $user = User::find()->all();
+        $user = User::find()->select(['id','name','email'])->all();
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            Yii::$app->session->setFlash('success', "Successfully validate!");
             $post = new Post();
             $post->title = $model->title;
             $post->text = $model->text;
             $post->user = implode(",", Yii::$app->request->post('user', []));
+            $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
+            $filePath = $model->imageFile->baseName . '.' . $model->imageFile->extension;
+            $savePath = Yii::getAlias('@app') . '/web/uploadImage/' . $filePath;;
+            $post->imagePath=$filePath;
             // print_r(Yii::$app->request->post('user', []));
-            
-            if ($post->save()) {
+
+            if ($post->save() && $model->imageFile->saveAs($savePath)) {
                 Yii::$app->session->setFlash('success', "Successfully saved!");
                 return $this->redirect(['task-manager/create-post']);
 
             }
 
-        } else {
-            Yii::$app->session->setFlash('error', "Not created!");
-
-        }
+        } 
+        
         return $this->render('create-post', ['model' => $model, 'user' => $user]);
     }
 }
