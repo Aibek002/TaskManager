@@ -134,10 +134,10 @@ class TaskManagerController extends Controller
             $post->user = implode(",", Yii::$app->request->post('user', []));
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
             $filePath = $model->imageFile->baseName . '.' . $model->imageFile->extension;
-            $savePath = Yii::getAlias('@app') . '/web/uploadImage/' . $filePath;
+            $savePath = Yii::$app->params['uploadImagePath'] . $filePath;
             $post->imagePath = $filePath;
 
-
+            // echo Yii::getAlias('@app');
             if ($model->imageFile->saveAs($savePath) && $post->save()) {
 
                 Yii::$app->session->setFlash('success', "Successfully saved!");
