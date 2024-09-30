@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\models\CreateAvatarForm;
 use app\models\CreatePostForm;
 use app\models\Post;
 use app\models\SignInForm;
@@ -145,7 +146,7 @@ class TaskManagerController extends Controller
             $post->user = implode(",", Yii::$app->request->post('user', []));
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
             $filePath = uniqid() . '.' . $model->imageFile->extension;
-            $savePath = Yii::$app->params['uploadImagePath'] . $filePath;
+            $savePath = Yii::$app->params['uploadImagePath'] . Yii::$app->user->id . "/publication/" . $filePath;
             $post->imagePath = $filePath;
 
             // echo Yii::getAlias('@app');
@@ -159,5 +160,59 @@ class TaskManagerController extends Controller
         }
 
         return $this->render('create-post', ['model' => $model, 'user' => $user]);
+    }
+    public function actionCreateAvatar()
+    {
+        function clearImageDirectoryUsingGlob($dir)
+        {
+            // Проверяем, существует ли директория
+            if (is_dir($dir)) {
+                // Получаем все файлы изображений в директории
+                $files = glob($dir . '/*.{jpg,jpeg,png,gif}', GLOB_BRACE); // Указываем расширения
+
+                // Перебираем все найденные файлы
+                foreach ($files as $file) {
+                    if (is_file($file)) {
+                        unlink($file); // Удаляем файл
+                    }
+                }
+            } else {
+                echo "Директория не найдена: $dir";
+            }
+        }
+
+        // Используйте функцию, передав путь к директории
+
+        $model = new CreateAvatarForm();
+
+        if ($model->load(Yii::$app->request->post())) {
+            $model->imageAvatar = UploadedFile::getInstance($model, 'imageAvatar');
+            if ($model->imageAvatar) {
+                $file = uniqid() . "." . $model->imageAvatar->extension;
+                $savePath = Yii::$app->params['uploadImagePath'] . Yii::$app->user->id . "/avatar/" . $file;
+                $model->fileName = $file;
+                $model->id_user = Yii::$app->user->id;
+                $avatar = CreateAvatarForm::deleteAll(['id_user' => Yii::$app->user->id]);
+          
+                if ($model->save()) {
+                    clearImageDirectoryUsingGlob(Yii::$app->params['uploadImagePath'] . Yii::$app->user->id . "/avatar/");
+                    if ($model->imageAvatar->saveAs($savePath)) {
+                        Yii::$app->session->setFlash('success', 'succefully upload!');
+                    } else {
+                        Yii::$app->session->setFlash('error', 'Error with saving files!');
+
+                    }
+                } else {
+                    Yii::$app->session->setFlash('error', 'Error with saving!');
+
+                }
+
+            } else {
+                Yii::$app->session->setFlash('error', 'Error unknown file!');
+            }
+        } else {
+            Yii::$app->session->setFlash('error', 'No file uploaded!');
+        }
+        return $this->render('create-avatar', ['model' => $model]);
     }
 }

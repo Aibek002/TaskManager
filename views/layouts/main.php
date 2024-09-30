@@ -4,6 +4,7 @@
 /** @var string $content */
 
 use app\assets\AppAsset;
+use app\models\CreateAvatarForm;
 use app\widgets\Alert;
 use yii\bootstrap5\Breadcrumbs;
 use yii\bootstrap5\Html;
@@ -21,6 +22,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => $this->params['meta_k
 $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii::getAlias('@web/favicon.ico')]);
 $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii::getAlias('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css')]);
 
+$avatar = CreateAvatarForm::findOne(['id_user' => Yii::$app->user->id]);
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -43,22 +45,28 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 
         <ul class="nav nav-pills">
             <li class="nav-item">
-                <a href="<?= Url::to(['task-manager/users']) ?>"
-                    class="header-menu-link nav-link">Список пользователей</a>
-                </li>
+                <a href="<?= Url::to(['task-manager/users']) ?>" class="header-menu-link nav-link">Список
+                    пользователей</a>
+            </li>
             <li class="nav-item">
-                <a href="<?= Url::to(['task-manager/create-post']) ?>"
-                    class="header-menu-link nav-link">Создать</a>
-                </li>
+                <a href="<?= Url::to(['task-manager/create-post']) ?>" class="header-menu-link nav-link">Создать</a>
+            </li>
 
             <li class="nav-item">
                 <?php if (!Yii::$app->user->isGuest): ?>
                 <li>
-                    <?= Html::a(
-                        Html::encode(Yii::$app->user->identity->name),
-                        ['user/profile'],
-                        ['class' => 'header-menu-link nav-link'],
-                    ) ?>
+                    <a class='header-menu-link nav-link' href="<?= Url::to(['task-manager/create-avatar']) ?>">
+                        <?php if (isset($avatar)): ?>
+                            <img style="width: 30px; height: 30px; border-radius: 100%;"
+                                src="<?= Url::to(Yii::$app->params['printImageTask'] . Yii::$app->user->id . '/avatar/' . $avatar->fileName) ?>"
+                                alt=""></a>
+                    <?php else: ?>
+                        <?= Html::a(
+                            Html::encode(Yii::$app->user->identity->name),
+                            ['task-manager/create-avatar'],
+                            ['class' => 'header-menu-link nav-link'],
+                        ) ?>
+                    <?php endif; ?>
                 </li>
                 <li class="nav-item">
                     <?php if (Yii::$app->user->can('createUser')): ?>
@@ -100,10 +108,10 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
     <main id="main" class="flex-shrink-0" role="main">
         <div class="container">
             <?php if (!empty($this->params['breadcrumbs'])): ?>
-                
+
                 <?= Breadcrumbs::widget(['links' => $this->params['breadcrumbs']]) ?>
             <?php endif ?>
-            
+
             <?= Alert::widget() ?>
             <?= $content ?>
         </div>
