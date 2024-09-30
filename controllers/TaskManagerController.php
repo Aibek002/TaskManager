@@ -33,6 +33,7 @@ class TaskManagerController extends Controller
                         'title' => $posts->title,
                         'text' => $posts->text,
                         'imagePath' => $posts->imagePath,
+                        'date' => $posts->date,
 
                     ];
 
@@ -58,8 +59,6 @@ class TaskManagerController extends Controller
                 $roles[$r->name] = $r->name;
 
             }
-            // var_dump($roles);
-            // die();
             $model = new SignUpForm();
             if ($model->load(Yii::$app->request->post()) && $model->validate()) {
                 $user = new User();
@@ -72,7 +71,18 @@ class TaskManagerController extends Controller
                 if (User::findByEmail($model->email)) {
                     Yii::$app->session->setFlash("error", "Email already exists: $model->email");
                 } else {
+
                     if ($user->save()) {
+                        $path = Yii::getAlias('@webroot/uploadImage/') . $user->getId();
+                        if (!is_dir($path)) {
+                            if (mkdir($path, 0777, true)) {
+                                $path_subdirectory_pub = $path . "/publication";
+                                $path_subdirectory_ava = $path . "/avatar";
+                                mkdir($path_subdirectory_pub, 0777, true);
+                                mkdir($path_subdirectory_ava, 0777, true);
+
+                            }
+                        }
                         $getRole = Yii::$app->request->post('roles', []);
                         foreach ($getRole as $grole) {
                             $role = Yii::$app->authManager->getRole($grole);
@@ -82,6 +92,7 @@ class TaskManagerController extends Controller
                                 throw new ForbiddenHttpException("Role which you select not found!");
                             }
                         }
+
                         Yii::$app->session->setFlash("success", "User created successfully.");
                     } else {
                         Yii::$app->session->setFlash("error", "Form didn't save!");
@@ -133,7 +144,7 @@ class TaskManagerController extends Controller
             $post->text = $model->text;
             $post->user = implode(",", Yii::$app->request->post('user', []));
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
-            $filePath = $model->imageFile->baseName . '.' . $model->imageFile->extension;
+            $filePath = uniqid() . '.' . $model->imageFile->extension;
             $savePath = Yii::$app->params['uploadImagePath'] . $filePath;
             $post->imagePath = $filePath;
 

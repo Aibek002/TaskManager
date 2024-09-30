@@ -13,7 +13,6 @@ use yii\helpers\ArrayHelper;
 <?= $form->field($model, 'email')->textInput(); ?>
 <?= $form->field($model, 'password_hash')->passwordInput(); ?>
 
-<?php print_r($roles); ?>
 <div>
     <label>Roles</label>
     <ul>
