@@ -31,6 +31,7 @@ class TaskManagerController extends Controller
 
                 if (Yii::$app->user->id == $userIds[$i]) {
                     $postForUser[] = [
+                        'id' => $posts->id,
                         'title' => $posts->title,
                         'text' => $posts->text,
                         'imagePath' => $posts->imagePath,
@@ -193,7 +194,7 @@ class TaskManagerController extends Controller
                 $model->fileName = $file;
                 $model->id_user = Yii::$app->user->id;
                 $avatar = CreateAvatarForm::deleteAll(['id_user' => Yii::$app->user->id]);
-          
+
                 if ($model->save()) {
                     clearImageDirectoryUsingGlob(Yii::$app->params['uploadImagePath'] . Yii::$app->user->id . "/avatar/");
                     if ($model->imageAvatar->saveAs($savePath)) {
