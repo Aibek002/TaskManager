@@ -7,6 +7,8 @@ use app\models\CreatePostForm;
 use app\models\Post;
 use app\models\SignInForm;
 use app\models\SignUpForm;
+use app\models\StatusType;
+use app\models\StatusUpdate;
 use app\models\User;
 use Yii;
 use app\models\Users;
@@ -21,6 +23,8 @@ class TaskManagerController extends Controller
 
     public function actionIndex()
     {
+        $status_table=StatusUpdate::find()->all();
+
         $post = Post::find()->all();
         $postForUser = [];
         foreach ($post as $posts) {
@@ -49,7 +53,7 @@ class TaskManagerController extends Controller
 
 
 
-        return $this->render("home", ['task' => $postForUser]);
+        return $this->render("home", ['task' => $postForUser, 'status'=>$status_table]);
     }
 
     public function actionSignUp()
@@ -216,7 +220,13 @@ class TaskManagerController extends Controller
         }
         return $this->render('create-avatar', ['model' => $model]);
     }
-    public function actionUpdateStatus($id){
-        return "hello " . $id ;
+    public function actionUpdateStatus($id , $status){
+        $status_table=new StatusUpdate();
+        $status_type=StatusType::findOne(['status_type'=>$status]);
+        $status_table->type=$status_type->id;
+        $status_table->task_id=$id;
+        $status_table->save();
+        return $this->render('update-status');
+
     }
 }
