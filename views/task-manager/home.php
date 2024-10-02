@@ -12,7 +12,6 @@ for ($i = 0; $i < count($task); $i++): ?>
         <div class="text">
             <h5><?php echo $task[$i]['title'] ?></h5>
             <h5><?php echo $task[$i]['id'] ?></h5>
-
             <p><?php echo $task[$i]['text'] ?></p>
             <p><?php echo $task[$i]['date'] ?></p>
 
