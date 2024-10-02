@@ -14,7 +14,7 @@ for ($i = 0; $i < count($task); $i++): ?>
             <h5><?php echo $task[$i]['id'] ?></h5>
             <p><?php echo $task[$i]['text'] ?></p>
             <p><?php echo $task[$i]['date'] ?></p>
-
+            <a href="<?= Url::to(['task-manager/update-status' , 'id'=> $task[$i]['id']]) ?>">Завершить</a>
             <a href="<?= Url::to("@web/uploadImage/" . Yii::$app->user->id . "/publication/" . $task[$i]['imagePath']) ?>"
                 download="Task">img</a>
         </div>

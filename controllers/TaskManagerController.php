@@ -216,4 +216,7 @@ class TaskManagerController extends Controller
         }
         return $this->render('create-avatar', ['model' => $model]);
     }
+    public function actionUpdateStatus($id){
+        return "hello " . $id ;
+    }
 }
