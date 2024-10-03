@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\CreateAvatarForm;
 use app\models\CreatePostForm;
 use app\models\Post;
+use app\models\PostToUsers;
 use app\models\SignInForm;
 use app\models\SignUpForm;
 use app\models\StatusType;
@@ -23,29 +24,46 @@ class TaskManagerController extends Controller
 
     public function actionIndex()
     {
-        $status_table=StatusUpdate::find()->all();
+        $status_table = StatusUpdate::find()->all();
+        $status_type = StatusType::find()
+            ->where(['!=', 'status_type', 'create'])
+            ->andWhere(['!=', 'status_type', 'active'])
+            ->all();
+        $userId = 36; // Замените на нужный user_id
 
-        $post = Post::find()->all();
+        $post = Post::find()
+            ->alias('p')
+            ->select(['p.*', 's.*'])
+            ->leftJoin(StatusUpdate::tableName() . ' s', 's.task_id = p.id')
+            ->where([
+                's.id' => (new \yii\db\Query())
+                    ->select('id')
+                    ->from(StatusUpdate::tableName())
+                    ->where('task_id = p.id')
+                    ->orderBy('status_date DESC')
+                    ->limit(1)
+            ])
+            ->andWhere([
+                'p.id' => (new \yii\db\Query())
+                    ->select('post_id')
+                    ->from('post_to_users')
+                    ->where(['user_id' => $userId])
+            ])
+            ->all();
         $postForUser = [];
         foreach ($post as $posts) {
-            $userIds = explode(',', $posts->user);// Получаем массив ID пользователей
 
-            // Если нужно, вы можете извлечь информацию о пользователях
-            for ($i = 0; $i < count($userIds); $i++) {
 
-                if (Yii::$app->user->id == $userIds[$i]) {
-                    $postForUser[] = [
-                        'id' => $posts->id,
-                        'title' => $posts->title,
-                        'text' => $posts->text,
-                        'imagePath' => $posts->imagePath,
-                        'date' => $posts->date,
 
-                    ];
+            $postForUser[] = [
+                'id' => $posts->id,
+                'title' => $posts->title,
+                'text' => $posts->text,
+                'imagePath' => $posts->imagePath,
+                'date' => $posts->date,
 
-                }
-            }
 
+            ];
 
 
         }
@@ -53,8 +71,10 @@ class TaskManagerController extends Controller
 
 
 
-        return $this->render("home", ['task' => $postForUser, 'status'=>$status_table]);
+
+        return $this->render("home", ['task' => $postForUser, 'status_type' => $status_type]);
     }
+
 
     public function actionSignUp()
     {
@@ -148,7 +168,7 @@ class TaskManagerController extends Controller
             $post = new Post();
             $post->title = $model->title;
             $post->text = $model->text;
-            $post->user = implode(",", Yii::$app->request->post('user', []));
+            $post_for_user = Yii::$app->request->post('user', []);
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
             $filePath = uniqid() . '.' . $model->imageFile->extension;
             $savePath = Yii::$app->params['uploadImagePath'] . Yii::$app->user->id . "/publication/" . $filePath;
@@ -157,6 +177,14 @@ class TaskManagerController extends Controller
             // echo Yii::getAlias('@app');
             if ($model->imageFile->saveAs($savePath) && $post->save()) {
 
+
+                for ($i = 0; $i < count($post_for_user); $i++) {
+                    $post_to_users = new PostToUsers();
+                    $post_to_users->user_id = $post_for_user[$i];
+                    $post_to_users->post_id = $post->id;
+                    $post_to_users->save();
+
+                }
                 Yii::$app->session->setFlash('success', "Successfully saved!");
                 return $this->redirect(['task-manager/create-post']);
 
@@ -220,13 +248,14 @@ class TaskManagerController extends Controller
         }
         return $this->render('create-avatar', ['model' => $model]);
     }
-    public function actionUpdateStatus($id , $status){
-        $status_table=new StatusUpdate();
-        $status_type=StatusType::findOne(['status_type'=>$status]);
-        $status_table->type=$status_type->id;
-        $status_table->task_id=$id;
+    public function actionUpdateStatus($id, $status)
+    {
+        $status_table = new StatusUpdate();
+        $status_type = StatusType::findOne(['status_type' => $status]);
+        $status_table->type = $status_type->id;
+        $status_table->task_id = $id;
         $status_table->save();
-        return $this->render('update-status');
+        return $this->redirect('task-manager/index');
 
     }
 }

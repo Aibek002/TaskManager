@@ -97,8 +97,18 @@ main>.container {
     margin: 20px;
 }
 
-.img,
+.img_have,
 img {
+    width: 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    color: var(--border-color);
+}
+
+.img_empty{
     width: 300px;
     height: 300px;
     display: flex;
@@ -114,7 +124,30 @@ img {
     height: 20px;
     /* justify-content: center; */
     width: 100%;
+    gap: 10px;
+    font-size: 10px;
+    margin: 0;
+}
+
+.disabled-link {
+    pointer-events: none;
+    color: gray;
+    text-decoration: none;
+}
+
+.flex-button {
+    display: flex;
     gap: 20px;
+    padding: 20px 0;
+}
+
+.active-link {
+    border: 0.2px solid;
+    border-color: #0d0c22;
+    color: #0d0c22;
+    border-radius: 10px;
+    padding: 0px 10px 5px;
+    text-decoration: none;
 }
 
 @media(max-width:767px) {
