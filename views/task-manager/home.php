@@ -24,20 +24,32 @@ for ($i = 0; $i < count($task); $i++):
 
         <div class="text">
             <h5><?php echo $task[$i]['title'] ?></h5>
-            <p><?php echo $task[$i]['text'] ?></p>
+            <div class="flex-status">
+                <?php switch ($task[$i]['status_type']) {
+                    case 'create':
+                        echo '<svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="2.5" cy="2.5" r="2.5" fill="#CBC9B5" /></svg>';
+                        break;
+                    case 'active':
+                        echo '<svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="2.5" cy="2.5" r="2.5" fill="#05FF00" /></svg>';
+                        break;
+                    case 'take':
+                        echo '<svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="2.5" cy="2.5" r="2.5" fill="#6100FF" /></svg>';
+                        break;
+                    case 'cancel':
+                        echo '<svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="2.5" cy="2.5" r="2.5" fill="#FF0F00" /></svg>';
+                        break;
+                    case 'compare':
+                        echo '<svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="2.5" cy="2.5" r="2.5" fill="#2400FF" /></svg>';
+                        break;
+                } ?>
+                <p><?php echo $task[$i]['status_type'] ?></p>
+                <p><?php echo $task[$i]['status_date'] ?></p>
 
-            <div class="flex-button">
-                <?php foreach ($status_type as $status_types): ?>
-                    <a class="active-link" href="<?= Url::to([
-                        'task-manager/update-status',
-                        'id' => $task[$i]['id'],
-                        'status' => $status_types->status_type
-                    ]) ?>"><?= $status_types->status_type ?></a>
-                <?php endforeach ?>
 
-                <!-- <a href="<?= Url::to("@web/uploadImage/" . Yii::$app->user->id . "/publication/" . $task[$i]['imagePath']) ?>"
-                        download="Task">img</a> -->
             </div>
+
+
+            
         </div>
     </div>
 

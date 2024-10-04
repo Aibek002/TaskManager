@@ -30,49 +30,22 @@ class TaskManagerController extends Controller
             ->andWhere(['!=', 'status_type', 'active'])
             ->all();
         $userId = 36; // Замените на нужный user_id
-
-        $post = Post::find()
-            ->alias('p')
-            ->select(['p.*', 's.*'])
-            ->leftJoin(StatusUpdate::tableName() . ' s', 's.task_id = p.id')
-            ->where([
-                's.id' => (new \yii\db\Query())
-                    ->select('id')
-                    ->from(StatusUpdate::tableName())
-                    ->where('task_id = p.id')
-                    ->orderBy('status_date DESC')
-                    ->limit(1)
-            ])
-            ->andWhere([
-                'p.id' => (new \yii\db\Query())
-                    ->select('post_id')
-                    ->from('post_to_users')
-                    ->where(['user_id' => $userId])
-            ])
-            ->all();
-        $postForUser = [];
-        foreach ($post as $posts) {
-
-
-
-            $postForUser[] = [
-                'id' => $posts->id,
-                'title' => $posts->title,
-                'text' => $posts->text,
-                'imagePath' => $posts->imagePath,
-                'date' => $posts->date,
-
-
-            ];
-
-
-        }
+        $sql = 'SELECT p.*, s.* , status_type.status_type FROM post AS p 
+                    LEFT JOIN status AS s ON (s.task_id = p.id) 
+                    LEFT JOIN status_type ON (status_type.id= s.type) 
+                    WHERE s.id = ( SELECT id FROM status WHERE task_id = p.id ORDER BY status_date DESC LIMIT 1 ) 
+                    AND p.id IN(SELECT post_id FROM post_to_users where user_id=:id);';
+        $post = Yii::$app->db->createCommand(
+            $sql,
+            [':id' => Yii::$app->user->id]
+        )->queryAll();
+        // print_r($post);
 
 
 
 
 
-        return $this->render("home", ['task' => $postForUser, 'status_type' => $status_type]);
+        return $this->render("home", ['task' => $post, 'status_type' => $status_type ]);
     }
 
 
@@ -180,6 +153,10 @@ class TaskManagerController extends Controller
 
                 for ($i = 0; $i < count($post_for_user); $i++) {
                     $post_to_users = new PostToUsers();
+                    $status = new StatusUpdate();
+                    $status->type = 1;
+                    $status->task_id = $post->id;
+                    $status->save();
                     $post_to_users->user_id = $post_for_user[$i];
                     $post_to_users->post_id = $post->id;
                     $post_to_users->save();
@@ -254,6 +231,7 @@ class TaskManagerController extends Controller
         $status_type = StatusType::findOne(['status_type' => $status]);
         $status_table->type = $status_type->id;
         $status_table->task_id = $id;
+        // print_r($id);
         $status_table->save();
         return $this->redirect('task-manager/index');
 
