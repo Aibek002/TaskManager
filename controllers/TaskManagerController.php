@@ -24,7 +24,6 @@ class TaskManagerController extends Controller
 
     public function actionIndex()
     {
-        $status_table = StatusUpdate::find()->all();
         $status_type = StatusType::find()
             ->where(['!=', 'status_type', 'create'])
             ->andWhere(['!=', 'status_type', 'active'])
@@ -34,7 +33,7 @@ class TaskManagerController extends Controller
                     LEFT JOIN status AS s ON (s.task_id = p.id) 
                     LEFT JOIN status_type ON (status_type.id= s.type) 
                     WHERE s.id = ( SELECT id FROM status WHERE task_id = p.id ORDER BY status_date DESC LIMIT 1 ) 
-                    AND p.id IN(SELECT post_id FROM post_to_users where user_id=:id);';
+                    AND p.id IN(SELECT post_id FROM post_to_users where user_id=:id) ORDER BY p.id DESC ;';
         $post = Yii::$app->db->createCommand(
             $sql,
             [':id' => Yii::$app->user->id]
@@ -45,7 +44,7 @@ class TaskManagerController extends Controller
 
 
 
-        return $this->render("home", ['task' => $post, 'status_type' => $status_type ]);
+        return $this->render("home", ['task' => $post, 'status_type' => $status_type]);
     }
 
 
@@ -235,5 +234,21 @@ class TaskManagerController extends Controller
         $status_table->save();
         return $this->redirect('task-manager/index');
 
+    }
+    public function actionAllInformationPosts($id)
+    {
+        $sql = 'SELECT p.*, s.* , status_type.status_type FROM post AS p 
+                    LEFT JOIN status AS s ON (s.task_id = p.id) 
+                    LEFT JOIN status_type ON (status_type.id= s.type) 
+                    WHERE 
+                    p.id= :id_post';
+        $post = Yii::$app->db->createCommand(
+            $sql,
+            [
+
+                ':id_post' => $id
+            ]
+        )->queryAll();
+        print_r($post);
     }
 }
