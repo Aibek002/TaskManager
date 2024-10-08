@@ -23,11 +23,13 @@
             <?php endif; ?>
 
             <div class="text">
-                <a href="<?= Url::to(['task-manager/all-information-posts','id'=>$task[$i]['task_id']])?>"><?php echo $task[$i]['title'] ?></a>
+                <div class="text-link">
+                    <a class="text-link" href="<?= Url::to(['task-manager/more-information-posts', 'id' => $task[$i]['task_id']]) ?>"><?php echo $task[$i]['title'] ?></a>
+                </div>
                 <div class="flex-status">
                     <?php switch ($task[$i]['status_type']) {
                         case 'create':
-                            echo '<svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="2.5" cy="2.5" r="2.5" fill="#CBC9B5" /></svg>';
+                            echo '<svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg"> <circle cx="2.5" cy="2.5" r="2.5" fill="#00D1FF" /></svg>';
                             break;
                         case 'active':
                             echo '<svg width="5" height="5" viewBox="0 0 5 5" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="2.5" cy="2.5" r="2.5" fill="#05FF00" /></svg>';

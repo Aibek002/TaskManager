@@ -16,6 +16,7 @@ class CreatePostForm extends Model
     {
         return [
             [['title', 'text'], 'required'],
+            [['title'], 'string', 'max' => 40],
             [['imageFile'], 'file', 'extensions' => 'jpg, png, jpeg', 'maxSize' => 10 * 1024 * 1024],
         ];
     }

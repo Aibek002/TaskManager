@@ -145,7 +145,6 @@ class TaskManagerController extends Controller
             $filePath = uniqid() . '.' . $model->imageFile->extension;
             $savePath = Yii::$app->params['uploadImagePath'] . Yii::$app->user->id . "/publication/" . $filePath;
             $post->imagePath = $filePath;
-
             // echo Yii::getAlias('@app');
             if ($model->imageFile->saveAs($savePath) && $post->save()) {
 
@@ -235,7 +234,7 @@ class TaskManagerController extends Controller
         return $this->redirect('task-manager/index');
 
     }
-    public function actionAllInformationPosts($id)
+    public function actionMoreInformationPosts($id)
     {
         $sql = 'SELECT p.*, s.* , status_type.status_type FROM post AS p 
                     LEFT JOIN status AS s ON (s.task_id = p.id) 
@@ -249,6 +248,6 @@ class TaskManagerController extends Controller
                 ':id_post' => $id
             ]
         )->queryAll();
-        print_r($post);
+        return $this->render('more-information-posts', ['post' => $post]);
     }
 }

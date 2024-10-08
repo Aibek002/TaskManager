@@ -1,0 +1,62 @@
+<?php
+
+use yii\db\Migration;
+
+/**
+ * Handles the creation of table `{{%images}}`.
+ * Has foreign keys to the tables:
+ *
+ * - `{{%images_type}}`
+ */
+class m241008_104336_create_images_table extends Migration
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function safeUp()
+    {
+        $this->createTable('{{%images}}', [
+            'id' => $this->primaryKey(),
+            'type' => $this->integer(),
+            'path' => $this->string(),
+            'alt' => $this->string(),
+        ]);
+
+        // creates index for column `type`
+        $this->createIndex(
+            '{{%idx-images-type}}',
+            '{{%images}}',
+            'type'
+        );
+
+        // add foreign key for table `{{%images_type}}`
+        $this->addForeignKey(
+            '{{%fk-images-type}}',
+            '{{%images}}',
+            'type',
+            '{{%images_type}}',
+            'id',
+            'CASCADE'
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function safeDown()
+    {
+        // drops foreign key for table `{{%images_type}}`
+        $this->dropForeignKey(
+            '{{%fk-images-type}}',
+            '{{%images}}'
+        );
+
+        // drops index for column `type`
+        $this->dropIndex(
+            '{{%idx-images-type}}',
+            '{{%images}}'
+        );
+
+        $this->dropTable('{{%images}}');
+    }
+}

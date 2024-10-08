@@ -11,8 +11,11 @@ class Post extends ActiveRecord
     {
         return 'post';
     }
-    public function getUserIds()
+    public function rules()
     {
-        return explode(',', $this->user); // Преобразуем строку в массив
+        return [
+            [['title', 'text'], 'required'],
+            [['title'], 'string', 'max' => 25],
+        ];
     }
 }

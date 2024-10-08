@@ -1,0 +1,67 @@
+<?php
+
+use yii\db\Migration;
+
+/**
+ * Handles the creation of table `{{%post}}`.
+ * Has foreign keys to the tables:
+ *
+ * - `{{%images}}`
+ */
+class m241008_104054_create_post_table extends Migration
+{
+    /**
+     * {@inheritdoc}
+     */
+    public function safeUp()
+    {
+        if ($this->db->schema->getTableSchema('{{%status}}', true) !== null) {
+        $this->createTable('{{%post}}', [
+            'id' => $this->primaryKey(),
+            'title' => $this->string(40),
+            'text' => $this->text(),
+            'images_id' => $this->integer(),
+            'date' => $this->timestamp()()->deffaultExpression('CURRENT_TIMESTAMP'),
+            'imagePath' => $this->string(),
+        ]);
+
+        // creates index for column `images_id`
+        $this->createIndex(
+            '{{%idx-post-images_id}}',
+            '{{%post}}',
+            'images_id'
+        );
+
+        // add foreign key for table `{{%images}}`
+        $this->addForeignKey(
+            '{{%fk-post-images_id}}',
+            '{{%post}}',
+            'images_id',
+            '{{%images}}',
+            'id',
+        );
+    }else{
+        echo "Table 'status' does not exist. Skipping foreign key addition.\n";
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function safeDown()
+    {
+        // drops foreign key for table `{{%images}}`
+        $this->dropForeignKey(
+            '{{%fk-post-images_id}}',
+            '{{%post}}'
+        );
+
+        // drops index for column `images_id`
+        $this->dropIndex(
+            '{{%idx-post-images_id}}',
+            '{{%post}}'
+        );
+
+        $this->dropTable('{{%post}}');
+    }
+}
