@@ -40,7 +40,7 @@ $avatar = CreateAvatarForm::findOne(['id_user' => Yii::$app->user->id]);
         <a href="/"
             class="logo d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
 
-            <span class="fs-4">Task Meneger</span>
+            <span class="fs-4">Task Manager</span>
         </a>
 
         <ul class="nav nav-pills">
@@ -120,8 +120,8 @@ $avatar = CreateAvatarForm::findOne(['id_user' => Yii::$app->user->id]);
     <footer id="footer" class="mt-auto py-3 bg-light">
         <div class="container">
             <div class="row text-muted">
-                <div class="col-md-6 text-center text-md-start">&copy; My Company <?= date('Y') ?></div>
-                <div class="col-md-6 text-center text-md-end"><?= Yii::powered() ?></div>
+                <div class="col-md-6 text-center text-md-start">&copy; Task-Manager <?= date('Y') ?></div>
+                <div class="col-md-6 text-center text-md-end">Author: Aibek</div>
             </div>
         </div>
     </footer>

@@ -21,7 +21,6 @@
 
 .d-flex.flex-column.h-100 {
     /* background: linear-gradient(149deg, #000 0%, #07022b 39.5%); */
-    background: #0d0c22;
     background-size: 100 100;
     background-repeat: no-repeat;
 }
@@ -30,19 +29,20 @@ main>.container {
     padding: 70px 15px 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
 .header {
     background: var(--bg);
 }
-.flex-container{
+
+.flex-container {
     padding: 70px 15px 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 70%;
 }
+
 .logo span {
     color: var(--header-font-color);
     font-weight: 700;
@@ -121,8 +121,7 @@ main>.container {
 
 }
 
-.img_have,
-img {
+.img_have img {
     width: 100px;
     height: 100px;
     display: flex;
@@ -156,7 +155,7 @@ img {
 }
 
 .flex-status p {
-    margin: 0 0 4px 0;
+    margin: 0 0 3px 0;
     line-height: 1;
     font-size: 10px;
 }
@@ -173,7 +172,7 @@ img {
     position: relative;
 }
 
-.text-link{
+.text-link {
     font-size: 14px;
     color: black;
 }
@@ -220,4 +219,48 @@ img {
 
 .form-group {
     margin-bottom: 1rem;
+}
+
+/* ------------------------ */
+.center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.more-information-flex {
+    border-radius: 10px;
+    box-shadow: inset 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+    background: #fffbfb;
+    display: flex;
+    gap: 20px;
+}
+
+.more-information-image {
+    width: 100%;
+    height: 100%;
+    /* object-fit: cover; */
+    border-radius: 10px;
+    /* Закругление углов, если нужно */
+}
+.text-more-information-post{
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+    width: 100%;
+}
+.post-text-more-information{
+
+}
+.button-status-type-submit{
+    display: flex;
+    gap: 10px;
+}
+.button-status-type-submit button{
+    width: 100px;
+    border-radius: 10px;
+    background-color: transparent;
+    border: 2px solid #0d0c22;
 }

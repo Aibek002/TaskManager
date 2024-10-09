@@ -236,6 +236,10 @@ class TaskManagerController extends Controller
     }
     public function actionMoreInformationPosts($id)
     {
+        $status_type = StatusType::find()
+            ->where(['!=', 'status_type', 'create'])
+            ->andWhere(['!=', 'status_type', 'active'])
+            ->all();
         $sql = 'SELECT p.*, s.* , status_type.status_type FROM post AS p 
                     LEFT JOIN status AS s ON (s.task_id = p.id) 
                     LEFT JOIN status_type ON (status_type.id= s.type) 
@@ -248,6 +252,7 @@ class TaskManagerController extends Controller
                 ':id_post' => $id
             ]
         )->queryAll();
-        return $this->render('more-information-posts', ['post' => $post]);
+        // print_r($status_type);
+        return $this->render('more-information-posts', ['post' => $post, 'status_type' => $status_type]);
     }
 }
