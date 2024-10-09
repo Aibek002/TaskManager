@@ -48,5 +48,6 @@ $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['task-manag
             <?php endfor ?>
         </div>
     </div>
+    <div class="dialog"></div>
 </div>
 <!-- <?php print_r($status_type[0]['status_type']); ?> -->
