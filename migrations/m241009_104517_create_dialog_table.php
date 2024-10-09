@@ -20,42 +20,40 @@ class m241009_104517_create_dialog_table extends Migration
             'id' => $this->primaryKey(),
             'user_from' => $this->integer(),
             'comments' => $this->text(),
-            'date' => $this->timestamp()()->defaultExpression('CURRENT_TIMESTAMP'),
+            'date' => $this->timestamp()->defaultExpression('CURRENT_TIMESTAMP'),
             'post_id' => $this->integer(),
         ]);
 
         // creates index for column `user_from`
         $this->createIndex(
-            '{{%idx-dialog-user_from}}',
+            '{{%dialog_idx_user_id}}',
             '{{%dialog}}',
             'user_from'
         );
 
         // add foreign key for table `{{%user}}`
         $this->addForeignKey(
-            '{{%fk-dialog-user_from}}',
+            '{{%dialog_fk_user_id}}',
             '{{%dialog}}',
             'user_from',
             '{{%user}}',
             'id',
-            'CASCADE'
         );
 
         // creates index for column `post_id`
         $this->createIndex(
-            '{{%idx-dialog-post_id}}',
+            '{{%dialog_idx_post_id}}',
             '{{%dialog}}',
             'post_id'
         );
 
         // add foreign key for table `{{%post}}`
         $this->addForeignKey(
-            '{{%fk-dialog-post_id}}',
+            '{{%dialog_fk_post_id}}',
             '{{%dialog}}',
             'post_id',
             '{{%post}}',
             'id',
-            'CASCADE'
         );
     }
 
@@ -66,25 +64,25 @@ class m241009_104517_create_dialog_table extends Migration
     {
         // drops foreign key for table `{{%user}}`
         $this->dropForeignKey(
-            '{{%fk-dialog-user_from}}',
+            '{{%dialog_fk_user_id}}',
             '{{%dialog}}'
         );
 
         // drops index for column `user_from`
         $this->dropIndex(
-            '{{%idx-dialog-user_from}}',
+            '{{%dialog_idx_user_id}}',
             '{{%dialog}}'
         );
 
         // drops foreign key for table `{{%post}}`
         $this->dropForeignKey(
-            '{{%fk-dialog-post_id}}',
+            '{{%dialog_fk_post_id}}',
             '{{%dialog}}'
         );
 
         // drops index for column `post_id`
         $this->dropIndex(
-            '{{%idx-dialog-post_id}}',
+            '{{%dialog_idx_post_id}}',
             '{{%dialog}}'
         );
 
