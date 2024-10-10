@@ -83,5 +83,3 @@ $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['task-manag
 
     </div>
 <?php endif ?>
-
-<!-- <?php print_r($status_type[0]['status_type']); ?> -->
