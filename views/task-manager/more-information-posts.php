@@ -6,11 +6,9 @@ use yii\helpers\Url;
 $this->title = 'Все информацы';
 $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['task-manager/create-post']];
 ?>
-
 <?php if ($post[0]['user_id'] !== Yii::$app->user->id): ?>
     <h2>You have not access to this post</h2>
 <?php else: ?>
-
     <div class="center">
         <div class="more-information-flex">
             <img class="more-information-image" src="<?= Url::to(
@@ -19,7 +17,6 @@ $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['task-manag
                 "/publication/"
                 . $post[0]['imagePath']
             ); ?>" alt="">
-
         </div>
         <div class="text-more-information-post">
             <p><strong><?php echo $post[0]['title'] ?></strong></p>
@@ -53,33 +50,29 @@ $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['task-manag
                 <?php endfor ?>
             </div>
         </div>
-
         <div class="dialog">
+            <div class="comment-text">
+                <?php for ($i = 0; $i < count($comments); $i++): ?>
+                    <?php if ($comments[$i]['post_id'] == $post[0]['task_id']): ?>
+                        <?php if ($comments[$i]['user_from'] == Yii::$app->user->id): ?>
+                            <div class="my_comments">
+                                <?php echo $comments[$i]['comments'] ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="other_comments">
+                                <?php echo $comments[$i]['comments'] ?>
+                            </div>
+                        <?php endif ?>
 
-         <div class="comment-text">
-         <?php for ($i = 0; $i < count($comments); $i++): ?>
-                <?php if ($comments[$i]['post_id'] == $post[0]['task_id']): ?>
-                    <?php if ($comments[$i]['user_from'] == Yii::$app->user->id): ?>
-                        <div class="my_comments">
-                            <?php echo $comments[$i]['comments'] ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="other_comments">
-                            <?php echo $comments[$i]['comments'] ?>
-                        </div>
                     <?php endif ?>
-
-                <?php endif ?>
-            <?php endfor ?>
-         </div>
+                <?php endfor ?>
+            </div>
             <div class="comment-form">
                 <?php $form = ActiveForm::begin() ?>
                 <?= $form->field($model, 'comments')->textInput(); ?>
                 <?= Html::submitButton('>', ['class' => 'btn btn-primary', 'enableClientValidation' => false,]) ?>
                 <?php ActiveForm::end() ?>
             </div>
-
         </div>
-
     </div>
 <?php endif ?>
