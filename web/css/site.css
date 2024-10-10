@@ -270,9 +270,98 @@ main>.container {
 }
 
 .dialog {
-    width: 40%;
     box-shadow: inset 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25);
     background: #fffbfb;
+    width: 60%;
     height: 300px;
+    padding: 10px;
     border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    gap: 5px
+}
+
+
+
+.my_comments {
+    background: rgba(37, 185, 34, 0.49);
+    border-radius: 10px;
+    padding: 10px;
+    width: auto;
+    /* Ширина зависит от текста */
+    max-width: 80%;
+    /* Максимальная ширина, если текст слишком длинный */
+    float: right;
+    /* Размещение блока справа */
+    margin-left: auto;
+    /* Чтобы блок сдвинулся к правому краю */
+    clear: both;
+    /* Чтобы блоки не пересекались друг с другом */
+}
+
+.other_comments {
+    background: rgba(34, 185, 64, 0.488);
+    border-radius: 10px;
+    padding: 10px;
+    width: auto;
+    /* Ширина зависит от текста */
+    max-width: 80%;
+    /* Максимальная ширина, если текст слишком длинный */
+    float: left;
+    /* Размещение блока справа */
+    margin-right: auto;
+    /* Чтобы блок сдвинулся к правому краю */
+    clear: both;
+    /* Чтобы блоки не пересекались друг с другом */
+}
+
+form {
+    display: flex;
+    gap: 5px;
+    width: 90%;
+}
+
+.comment-form {
+    position: absolute;
+    bottom: 5px;
+    z-index: 100;
+    background: #ffffff;
+    border-radius: 10px;
+    height: 50px;
+    display: flex;
+    align-items: end;
+}
+
+.comment-text {
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    /* Скрываем для Internet Explorer и Edge */
+    scrollbar-width: none;
+    /* Скрываем для Firefox */
+    padding: 20px 0 60px 0;
+}
+
+.comment-text::-webkit-scrollbar {
+    display: none;
+    /* Скрываем для браузеров на основе WebKit (Chrome, Safari) */
+}
+
+
+.mb-3.field-dialogform-comments {
+    margin: 0 !important;
+}
+
+.has-success .form-control {
+    background-image: none;
+    /* Скрывает иконку галочки */
+}
+
+.form-label {
+    display: none
+}
+
+.btn.btn-primary {
+    height: 100%;
+    border-radius: 100%;
 }

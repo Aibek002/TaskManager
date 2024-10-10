@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\CreateAvatarForm;
 use app\models\CreatePostForm;
+use app\models\DialogForm;
 use app\models\Post;
 use app\models\PostToUsers;
 use app\models\SignInForm;
@@ -240,9 +241,25 @@ class TaskManagerController extends Controller
             ->where(['!=', 'status_type', 'create'])
             ->andWhere(['!=', 'status_type', 'active'])
             ->all();
-        $sql = 'SELECT p.*, s.* , status_type.status_type FROM post AS p 
+        $model = new DialogForm();
+
+        if ($model->load(Yii::$app->request->post())) {
+            $model->user_from = Yii::$app->user->id;
+            $model->post_id = $id;
+            if ($model->save()) {
+                return $this->refresh();
+            }
+        }
+        $dialog = DialogForm::find()
+            ->where(['post_id' => $id])
+            ->all();
+
+        // print_r($dialog);
+        $sql = 'SELECT p.*, s.* , status_type.status_type , post_to_users.user_id FROM post AS p 
                     LEFT JOIN status AS s ON (s.task_id = p.id) 
                     LEFT JOIN status_type ON (status_type.id= s.type) 
+                    LEFT JOIN post_to_users ON (p.id= post_to_users.post_id) 
+
                     WHERE 
                     p.id= :id_post';
         $post = Yii::$app->db->createCommand(
@@ -253,6 +270,6 @@ class TaskManagerController extends Controller
             ]
         )->queryAll();
         // print_r($status_type);
-        return $this->render('more-information-posts', ['post' => $post, 'status_type' => $status_type]);
+        return $this->render('more-information-posts', ['post' => $post, 'status_type' => $status_type, 'comments' => $dialog, 'model' => $model]);
     }
 }
