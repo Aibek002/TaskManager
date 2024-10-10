@@ -5,6 +5,7 @@ use yii\db\ActiveRecord;
 
 class DialogForm extends ActiveRecord{
 
+    
     public static function tableName(){
         return 'dialog';
     }
