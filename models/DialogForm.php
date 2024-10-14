@@ -13,7 +13,6 @@ class DialogForm extends ActiveRecord{
 {
     return [
         [['comments'], 'string'], // Поле должно быть строкой
-        [['user_from', 'post_id'], 'integer'], // user_from и post_id должны быть целыми числами
     ];
 }
 

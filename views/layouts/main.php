@@ -55,10 +55,11 @@ $avatar = CreateAvatarForm::findOne(['id_user' => Yii::$app->user->id]);
             <li class="nav-item">
                 <?php if (!Yii::$app->user->isGuest): ?>
                 <li>
-                    <a class='header-menu-link nav-link' href="<?= Url::to(['task-manager/create-avatar']) ?>">
+                  
                         <?php if (isset($avatar)): ?>
-                            <img style="width: 30px; height: 30px; border-radius: 100%;"
-                                src="<?= Url::to(Yii::$app->params['printImageTask'] . Yii::$app->user->id . '/avatar/' . $avatar->fileName) ?>"
+                             <a class='header-menu-link nav-link' href="<?= Url::to(['task-manager/create-avatar']) ?>"> <img style="width: 30px; height: 30px; border-radius: 100%;"
+                                src="<?= Url::to( 
+                                Yii::$app->params['printImageTask'] . Yii::$app->user->id . '/avatar/' . $avatar->fileName) ?>"
                                 alt=""></a>
                     <?php else: ?>
                         <?= Html::a(

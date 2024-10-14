@@ -137,36 +137,68 @@ class TaskManagerController extends Controller
     {
         $model = new CreatePostForm();
         $user = User::find()->select(['id', 'name', 'email'])->all();
+
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $post = new Post();
-            $post->title = $model->title;
-            $post->text = $model->text;
-            $post_for_user = Yii::$app->request->post('user', []);
+
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
+            // Сохраняем файл во временную директорию потому что гетИнстанс только один раз сохроняет изображение
+            $tempPath = Yii::getAlias('@webroot/') . uniqid() . $model->imageFile->extension;
+            $model->imageFile->saveAs($tempPath);
+
+            // Убедитесь, что файл загружен
+            if (!$model->imageFile) {
+                Yii::$app->session->setFlash('error', 'Изображение не загружено.');
+                return $this->redirect(['task-manager/create-post']);
+            }
+            $post_for_user = Yii::$app->request->post('user', []);
+            $post = new Post();
             $filePath = uniqid() . '.' . $model->imageFile->extension;
-            $savePath = Yii::$app->params['uploadImagePath'] . Yii::$app->user->id . "/publication/" . $filePath;
-            $post->imagePath = $filePath;
-            // echo Yii::getAlias('@app');
-            if ($model->imageFile->saveAs($savePath) && $post->save()) {
 
+            // Цикл по каждому пользователю
+            foreach ($post_for_user as $userId) {
 
-                for ($i = 0; $i < count($post_for_user); $i++) {
-                    $post_to_users = new PostToUsers();
-                    $status = new StatusUpdate();
-                    $status->type = 1;
+                $post_to_users = new PostToUsers();
+                $status = new StatusUpdate();
+                $status->type = 1;
+
+                // Создаем папки для каждого пользователя
+                $path = Yii::getAlias('@webroot/uploadImage/') . $userId;
+                if (!is_dir($path)) {
+                    if (mkdir($path, 0777, true)) {
+                        $path_subdirectory_pub = $path . "/publication";
+                        $path_subdirectory_ava = $path . "/avatar";
+                        mkdir($path_subdirectory_pub, 0777, true);
+                        mkdir($path_subdirectory_ava, 0777, true);
+                    }
+                }
+
+                // Генерация уникального имени файла
+                $savePath = Yii::$app->params['uploadImagePath'] . $userId . "/publication/" . $filePath;
+
+                // Присваиваем путь к изображению
+                $post->title = $model->title;
+                $post->text = $model->text;
+                $post->imagePath = $filePath;
+
+                if ($post->save()) {
+                    // Сохранение отношений между постом и пользователем
                     $status->task_id = $post->id;
-                    $status->save();
-                    $post_to_users->user_id = $post_for_user[$i];
+                    $post_to_users->user_id = $userId;
                     $post_to_users->post_id = $post->id;
                     $post_to_users->save();
+                    $status->save();
+                    copy($tempPath, $savePath);
 
+                    // Сохранение изображения
+                } else {
+                    Yii::$app->session->setFlash('error', 'Ошибка при сохранении поста');
                 }
-                Yii::$app->session->setFlash('success', "Successfully saved!");
-                return $this->redirect(['task-manager/create-post']);
-
             }
-
+            // Удаляем временный файл
+            unlink($tempPath);
+            return $this->redirect(['task-manager/index']);
         }
+
 
         return $this->render('create-post', ['model' => $model, 'user' => $user]);
     }
@@ -250,26 +282,36 @@ class TaskManagerController extends Controller
                 return $this->refresh();
             }
         }
-        $dialog = DialogForm::find()
-            ->where(['post_id' => $id])
-            ->all();
 
-        // print_r($dialog);
-        $sql = 'SELECT p.*, s.* , status_type.status_type , post_to_users.user_id FROM post AS p 
+
+        // print_r($model);
+        $sql = 'SELECT p.title, p.text, p.imagePath, s.task_id, s.status_date, status_type.status_type
+                    FROM post AS p 
                     LEFT JOIN status AS s ON (s.task_id = p.id) 
-                    LEFT JOIN status_type ON (status_type.id= s.type) 
-                    LEFT JOIN post_to_users ON (p.id= post_to_users.post_id) 
-
+                    LEFT JOIN status_type ON (status_type.id = s.type) 
+                    
                     WHERE 
-                    p.id= :id_post';
+                    p.id = :id_post 
+                    AND  :user_id IN (SELECT user_id FROM post_to_users WHERE post_id = :id_post)';
         $post = Yii::$app->db->createCommand(
             $sql,
             [
 
-                ':id_post' => $id
+                ':id_post' => $id,
+                ':user_id' => Yii::$app->user->getId()
             ]
         )->queryAll();
-        // print_r($status_type);
+        // print_r($post);
+
+        $sql_request_for_dialog = 'SELECT dialog.*,user.name,user.surname FROM dialog
+        LEFT JOIN user on (user.id=dialog.user_from) WHERE dialog.post_id=:id_post';
+        $dialog = Yii::$app->db->createCommand(
+            $sql_request_for_dialog,
+            [
+                ':id_post' => $id,
+            ]
+        )->queryAll();
+        // print_r($dialog);
         return $this->render('more-information-posts', ['post' => $post, 'status_type' => $status_type, 'comments' => $dialog, 'model' => $model]);
     }
 }

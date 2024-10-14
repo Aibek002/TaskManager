@@ -7,23 +7,29 @@ $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['task-manag
 ?>
 
 
+<div class="form-container">
 
-<?php $form = ActiveForm::begin(['options'=>['enctype'=> 'multipart/form-data']]) ?>
+    <?php $form = ActiveForm::begin([
+        'options' => [
+        'enctype' => 'multipart/form-data', 
+        'class' => 'form-input'
+        ]
+        ]); ?>
 
-<?= $form->field($model, 'title')->textInput(); ?>
-<?= $form->field($model, 'text')->textarea(); ?>
+    <?= $form->field($model, 'title')->textInput(); ?>
+    <?= $form->field($model, 'text')->textarea(); ?>
 
-<?php foreach ($user as $users): ?>
-   
-   <p>
-        <?= Html::checkbox('user[]', false, ['value' => $users->ID]) ?>
+    <?php foreach ($user as $users): ?>
 
-        <?= Html::encode($users->name) ?>
-    </p>
-<?php endforeach; ?>
-<?= $form->field($model,'imageFile')->fileInput();?>
-<?= Html::submitButton('Отправить', ['class' => 'btn btn-primary']); ?>
-<!-- <table class="table">
+        <p>
+            <?= Html::checkbox('user[]', false, ['value' => $users->ID]) ?>
+
+            <?= Html::encode($users->name) ?>
+        </p>
+    <?php endforeach; ?>
+    <?= $form->field($model, 'imageFile')->fileInput(); ?>
+    <?= Html::submitButton('Отправить', ['class' => 'btn btn-primary']); ?>
+    <!-- <table class="table">
     <thead>
         <tr>
             <th>ID</th>
@@ -45,4 +51,5 @@ $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['task-manag
     </tbody>
 </table> -->
 
-<?php ActiveForm::end(); ?>
+    <?php ActiveForm::end(); ?>
+</div>

@@ -1,11 +1,11 @@
 <?php use yii\helpers\Html; ?>
 <?php use yii\helpers\Url; ?>
-<div class="flex-container">
+<div class="flex-box-posts">
     <?php
 
     for ($i = 0; $i < count($task); $i++):
         ?>
-        <div class="flex">
+        <div class="flex-box-post-item">
             <?php if (isset($task[$i]['imagePath'])): ?>
                 <div class="img_have"> <img src="<?= Url::to(
                     Yii::$app->params['printImageTask'] .

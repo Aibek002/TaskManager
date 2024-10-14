@@ -4,10 +4,11 @@ use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
 ?>
 
-<p>Форма загружена успешно.</p>
 
-<?php $form = ActiveForm::begin() ?>
-
+<div class="form-container">
+    <?php $form = ActiveForm::begin([
+        'options' => ['class' => 'form-input']
+    ]) ?>
 <?= $form->field($model, 'name')->textInput(); ?>
 <?= $form->field($model, 'surname')->textInput(); ?>
 <?= $form->field($model, 'email')->textInput(); ?>
@@ -28,3 +29,4 @@ use yii\helpers\ArrayHelper;
 <?= Html::submitButton('Sign-Up', ['class' => 'btn btn-primary']); ?>
 
 <?php ActiveForm::end() ?>
+</div>

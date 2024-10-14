@@ -26,21 +26,25 @@
 }
 
 main>.container {
-    padding: 70px 15px 20px;
     display: flex;
     flex-direction: column;
+    margin: 0;
+    width: 100%;
+    max-width: 100vw;
+
 }
 
 .header {
     background: var(--bg);
 }
 
-.flex-container {
+.flex-box-posts {
     padding: 70px 15px 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 70%;
+    flex-wrap: wrap;
+    /* width: 70%; */
 }
 
 .logo span {
@@ -108,14 +112,14 @@ main>.container {
     color: rgba(255, 255, 255, 0.5);
 }
 
-.flex {
+.flex-box-post-item {
     display: flex;
     gap: 5%;
     margin: 20px;
     background: transparent;
     padding: 12px;
     border-radius: 20px;
-    width: 50%;
+    width: 30%;
     box-shadow: inset 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25);
     background: #d9d9d9;
 
@@ -238,11 +242,14 @@ main>.container {
 }
 
 .more-information-image {
-    width: 100%;
-    height: 100%;
-    /* object-fit: cover; */
+    width: 400px;
+    height: 400px;
+    object-fit: cover;
     border-radius: 10px;
-    /* Закругление углов, если нужно */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: gray;
 }
 
 .text-more-information-post {
@@ -272,7 +279,7 @@ main>.container {
 .dialog {
     box-shadow: inset 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25), 0 4px 4px 0 rgba(0, 0, 0, 0.25);
     background: #fffbfb;
-    width: 60%;
+    width: 600px;
     height: 300px;
     padding: 10px;
     border-radius: 10px;
@@ -301,9 +308,9 @@ main>.container {
 }
 
 .other_comments {
-    background: rgba(34, 185, 64, 0.488);
+    /* background: rgba(34, 185, 64, 0.488);
     border-radius: 10px;
-    padding: 10px;
+    padding: 10px; */
     width: auto;
     /* Ширина зависит от текста */
     max-width: 80%;
@@ -316,21 +323,57 @@ main>.container {
     /* Чтобы блоки не пересекались друг с другом */
 }
 
-form {
+.form-submit-comment {
     display: flex;
     gap: 5px;
-    width: 90%;
+    /* width: 90%; */
 }
 
 .comment-form {
     position: absolute;
     bottom: 5px;
     z-index: 100;
-    background: #ffffff;
+    background: #fffbfb;
     border-radius: 10px;
     height: 50px;
     display: flex;
     align-items: end;
+    left: 5px;
+    right: 5px;
+}
+
+.headers-comment {
+    border-radius: 10px;
+    position: absolute;
+    z-index: 10000;
+    top: 5px;
+    right: 5px;
+    left: 5px;
+    padding: 10px;
+    background-color: #fffbfb;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.author-comment {
+    margin: 0;
+}
+
+.comment {
+    background: rgba(34, 185, 64, 0.488);
+    border-radius: 10px;
+    padding: 10px;
+    width: auto;
+  
+}
+
+.text-headers-comment {
+    font-family: "Itim", sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+    color: #6cdb79;
+    margin: 0;
 }
 
 .comment-text {
@@ -339,11 +382,14 @@ form {
     /* Скрываем для Internet Explorer и Edge */
     scrollbar-width: none;
     /* Скрываем для Firefox */
-    padding: 20px 0 60px 0;
+    padding: 50px 0 60px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .comment-text::-webkit-scrollbar {
-    display: none;
+    /* display: none; */
     /* Скрываем для браузеров на основе WebKit (Chrome, Safari) */
 }
 
@@ -358,11 +404,32 @@ form {
 }
 
 
-.form-label {
-    display: none
+
+
+.btn-submit {
+    border-radius: 100%;
+    background: #6cdb79;
+    width: 45px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: transparent;
+    padding: 12px;
 }
 
-.btn.btn-primary {
-    height: 100%;
-    border-radius: 100%;
+.btn-submit svg {
+    margin-left: 2px;
+}
+
+.form-input {
+    width: 50%;
+
+}
+
+.form-container {
+    max-width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
