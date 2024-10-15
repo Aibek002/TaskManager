@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\CreateAvatarForm;
 use app\models\CreatePostForm;
 use app\models\DialogForm;
+use app\models\DialogRead;
 use app\models\Post;
 use app\models\PostToUsers;
 use app\models\SignInForm;
@@ -12,6 +13,7 @@ use app\models\SignUpForm;
 use app\models\StatusType;
 use app\models\StatusUpdate;
 use app\models\User;
+use PHPUnit\Framework\Constraint\IsEmpty;
 use Yii;
 use app\models\Users;
 use yii\web\Controller;
@@ -269,19 +271,16 @@ class TaskManagerController extends Controller
     }
     public function actionMoreInformationPosts($id)
     {
+
+
         $status_type = StatusType::find()
             ->where(['!=', 'status_type', 'create'])
             ->andWhere(['!=', 'status_type', 'active'])
             ->all();
         $model = new DialogForm();
+        $read_status = new DialogRead();
 
-        if ($model->load(Yii::$app->request->post())) {
-            $model->user_from = Yii::$app->user->id;
-            $model->post_id = $id;
-            if ($model->save()) {
-                return $this->refresh();
-            }
-        }
+
 
 
         // print_r($model);
@@ -289,7 +288,6 @@ class TaskManagerController extends Controller
                     FROM post AS p 
                     LEFT JOIN status AS s ON (s.task_id = p.id) 
                     LEFT JOIN status_type ON (status_type.id = s.type) 
-                    
                     WHERE 
                     p.id = :id_post 
                     AND  :user_id IN (SELECT user_id FROM post_to_users WHERE post_id = :id_post)';
@@ -303,15 +301,61 @@ class TaskManagerController extends Controller
         )->queryAll();
         // print_r($post);
 
-        $sql_request_for_dialog = 'SELECT dialog.*,user.name,user.surname FROM dialog
-        LEFT JOIN user on (user.id=dialog.user_from) WHERE dialog.post_id=:id_post';
+        $sql_request_for_dialog = 'SELECT dialog.*, user.name, user.surname , user.id FROM dialog
+        LEFT JOIN user on ( user.id = dialog.user_from ) WHERE dialog.post_id = :id_post';
         $dialog = Yii::$app->db->createCommand(
             $sql_request_for_dialog,
             [
                 ':id_post' => $id,
             ]
         )->queryAll();
-        // print_r($dialog);
-        return $this->render('more-information-posts', ['post' => $post, 'status_type' => $status_type, 'comments' => $dialog, 'model' => $model]);
+        // print_r($dialog[count($dialog)-1]['dialog_id']);
+
+        if ($model->load(Yii::$app->request->post())) {
+            $model->user_from = Yii::$app->user->id;
+            $model->post_id = $id;
+            if ($model->save()) {
+                $sql_request_for_get_post_to_users = 'SELECT post_to_users.user_id FROM post_to_users WHERE user_id != :user_id AND post_id=:post_id';
+                $users_post = Yii::$app->db->createCommand(
+                    $sql_request_for_get_post_to_users,
+                    [
+                        ':user_id' => Yii::$app->user->id,
+                        ':post_id' => $id
+                    ]
+                )->queryAll();
+                // print_r($users_post);
+                foreach ($users_post as $i => $users) {
+                    $read_status->dialog_id = $model->id;
+                    $read_status->read = 0;
+                    $read_status->user_to = $users['user_id'];
+                    $read_status->save();
+                }
+
+
+                return $this->refresh();
+            }
+        }
+        $sql = 'SELECT dialog_read.read FROM dialog_read WHERE user_to = :user_id AND dialog_read.read = 0';
+        $get_status = Yii::$app->db->createCommand(
+            $sql,
+            [':user_id' => Yii::$app->user->id]
+        )->queryAll();
+        // print_r($get_status);
+        if (isset($get_status)) {
+            $sql = 'UPDATE dialog_read SET dialog_read.read = 1 where user_to = :user_id';
+            $update_status_read = Yii::$app->db->createCommand(
+                $sql,
+                [':user_id' => Yii::$app->user->id]
+            )->execute();
+
+        }
+        $sql = 'SELECT dialog_read.read, user.name from dialog_read 
+        Left join user on ( user.id =  dialog_read.user_to ) where dialog_read.dialog_id = :dialog_id';
+        $get_read_user = Yii::$app->db->createCommand(
+            $sql,
+            [':dialog_id' => $dialog[count($dialog) - 1]['dialog_id']]
+        )->queryAll();
+        // print_r($get_read_user);
+        return $this->render('more-information-posts', ['post' => $post, 'status_type' => $status_type, 'comments' => $dialog, 'model' => $model, 'read' => $get_read_user]);
     }
 }
