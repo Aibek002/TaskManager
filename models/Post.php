@@ -15,7 +15,7 @@ class Post extends ActiveRecord
     {
         return [
             [['title', 'text'], 'required'],
-            [['title'], 'string', 'max' => 25],
+            [['title'], 'string', 'max' => 40],
         ];
     }
 }

@@ -137,69 +137,85 @@ class TaskManagerController extends Controller
 
     public function actionCreatePost()
     {
-        $model = new CreatePostForm();
-        $user = User::find()->select(['id', 'name', 'email'])->all();
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        if (Yii::$app->user->can('createPost')) {
 
-            $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
-            // Сохраняем файл во временную директорию потому что гетИнстанс только один раз сохроняет изображение
-            $tempPath = Yii::getAlias('@webroot/') . uniqid() . $model->imageFile->extension;
-            $model->imageFile->saveAs($tempPath);
+            $model = new CreatePostForm();
+            $user = User::find()->select(['id', 'name', 'email'])->where(['!=', 'id', Yii::$app->user->id])->all();
 
-            // Убедитесь, что файл загружен
-            if (!$model->imageFile) {
-                Yii::$app->session->setFlash('error', 'Изображение не загружено.');
-                return $this->redirect(['task-manager/create-post']);
-            }
-            $post_for_user = Yii::$app->request->post('user', []);
-            $post = new Post();
-            $filePath = uniqid() . '.' . $model->imageFile->extension;
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
 
-            // Цикл по каждому пользователю
-            foreach ($post_for_user as $userId) {
+                $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
 
-                $post_to_users = new PostToUsers();
-                $status = new StatusUpdate();
-                $status->type = 1;
+                if (!$model->imageFile) {
 
-                // Создаем папки для каждого пользователя
-                $path = Yii::getAlias('@webroot/uploadImage/') . $userId;
-                if (!is_dir($path)) {
-                    if (mkdir($path, 0777, true)) {
-                        $path_subdirectory_pub = $path . "/publication";
-                        $path_subdirectory_ava = $path . "/avatar";
-                        mkdir($path_subdirectory_pub, 0777, true);
-                        mkdir($path_subdirectory_ava, 0777, true);
+                    Yii::$app->session->setFlash('error', 'Изображение не загружено.');
+                    return $this->redirect(['task-manager/create-post']);
+
+                }
+
+                $tempPath = Yii::getAlias('@webroot/') . uniqid() . $model->imageFile->extension;
+                $model->imageFile->saveAs($tempPath);
+
+                $post_for_user = Yii::$app->request->post('user', []);
+                $post_for_user[] = Yii::$app->user->id;
+
+                $post = new Post();
+                $filePath = uniqid() . '.' . $model->imageFile->extension;
+
+                foreach ($post_for_user as $userId) {
+
+                    $post_to_users = new PostToUsers();
+                    $status = new StatusUpdate();
+                    $status->type = 1;
+                    $path = Yii::getAlias('@webroot/uploadImage/') . $userId;
+
+                    if (!is_dir($path)) {
+
+                        if (mkdir($path, 0777, true)) {
+
+                            $path_subdirectory_pub = $path . "/publication";
+                            $path_subdirectory_ava = $path . "/avatar";
+                            mkdir($path_subdirectory_pub, 0777, true);
+                            mkdir($path_subdirectory_ava, 0777, true);
+
+                        }
                     }
+
+                    $savePath = Yii::$app->params['uploadImagePath'] . $userId . "/publication/" . $filePath;
+                    $post->title = $model->title;
+                    $post->text = $model->text;
+                    $post->imagePath = $filePath;
+                    // print_r($post);
+
+                    if ($post->save()) {
+                        $status->task_id = $post->id;
+                        $post_to_users->user_id = $userId;
+                        $post_to_users->post_id = $post->id;
+                        $post_to_users->save();
+                        $status->save();
+                        copy($tempPath, $savePath);
+
+
+                    } else {
+
+                        Yii::$app->session->setFlash('error', 'Ошибка при сохранении поста : ' . implode(', ', $post->getErrorSummary(true)));
+
+                    }
+
                 }
 
-                // Генерация уникального имени файла
-                $savePath = Yii::$app->params['uploadImagePath'] . $userId . "/publication/" . $filePath;
+                unlink($tempPath);
+                return $this->redirect(['task-manager/index']);
 
-                // Присваиваем путь к изображению
-                $post->title = $model->title;
-                $post->text = $model->text;
-                $post->imagePath = $filePath;
-
-                if ($post->save()) {
-                    // Сохранение отношений между постом и пользователем
-                    $status->task_id = $post->id;
-                    $post_to_users->user_id = $userId;
-                    $post_to_users->post_id = $post->id;
-                    $post_to_users->save();
-                    $status->save();
-                    copy($tempPath, $savePath);
-
-                    // Сохранение изображения
-                } else {
-                    Yii::$app->session->setFlash('error', 'Ошибка при сохранении поста');
-                }
             }
-            // Удаляем временный файл
-            unlink($tempPath);
-            return $this->redirect(['task-manager/index']);
+
+        } else {
+
+            Yii::$app->session->setFlash('error', 'You cannot create post!');
+
         }
+
 
 
         return $this->render('create-post', ['model' => $model, 'user' => $user]);
