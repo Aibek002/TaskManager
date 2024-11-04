@@ -164,7 +164,7 @@ class TaskManagerController extends Controller
                 $filePath = uniqid() . '.' . $model->imageFile->extension;
 
                 foreach ($post_for_user as $userId) {
-
+ 
                     $post_to_users = new PostToUsers();
                     $status = new StatusUpdate();
                     $status->type = 1;

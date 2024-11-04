@@ -1,7 +1,7 @@
 let text = document.getElementsByClassName('subtext-link')
 let subtext = document.getElementsByClassName('subtext-text')
 
-
+//hhhf hhfhhf
 
 let html = document.getElementsByClassName('subtext-link');
 let html_subtext = document.getElementsByClassName('subtext-text');
@@ -12,7 +12,9 @@ function startRunningTitle() {
 
         let display = text[i].innerHTML;
         display = display.substring(1) + display[0];
-        html[i].innerHTML = display.replaceAll(" ", '&nbsp;');
+        html[i].innerHTML = display.replaceAll(" ", '&amp;nbsp;');
+//hhhf&amp;nbsp;hhfhhf
+
 
     }
 
@@ -21,10 +23,14 @@ function startRunningTitle() {
 function startRunningText() {
     
     for (let i = 0; i < subtext.length; i++) {
+        let element = subtext[i];
 
-        let display_subtext = subtext[i].innerHTML;
-        display_subtext = display_subtext.substring(1) + display_subtext[0];
-        html_subtext[i].innerHTML = display_subtext.replaceAll(" ", '&nbsp;');
+        if (!element.currentText) {
+            element.currentText = element.innerHTML;
+        }
+
+        element.currentText = element.currentText.substring(1) + element.currentText[0];
+        element.innerHTML = element.currentText.replaceAll(" ", '&nbsp;');
 
     }
 }
