@@ -19,13 +19,56 @@ use app\models\Users;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\UploadedFile;
+use yii\helpers\Url;
 
 class TaskManagerController extends Controller
 {
+    public function behaviors()
+    {
+        return [
+            "access" => [
+                "class" => \yii\filters\AccessControl::class,
+                "only" => ["logout", "index"],
+                "rules" => [
+                    // TODO(annad): Logout is post request!
+                    ["allow" => true, "actions" => ["index", "logout"], "roles" => ["@"]],
+                ],
+            ],
+        ];
+    }
+    public function actions()
+    {
+        return [
+            "error" => [
+                "class" => \yii\web\ErrorAction::class,
+            ],
+
+            "auth" => [
+                "class" => \yii\authclient\AuthAction::class,
+                "clientCollection" => "authClientCollection",
+            ],
+        ];
+    }
 
 
+   
+    public function actionLogin()
+    {
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+        $cli = Yii::$app->authClientCollection->getClient("keycloak");
+        $to = Url::to(["auth", "authclient" => $cli->getName()]);
+        return $this->redirect($to);
+        // print_r($cli);
 
-    public function actionIndex()
+    }
+    public function actionLogout()
+    {
+        Yii::$app->user->logout();
+        return $this->redirect(['task-manager/sign-in']);
+    }
+ public function actionIndex()
     {
         $status_type = StatusType::find()
             ->where(['!=', 'status_type', 'create'])
@@ -107,34 +150,6 @@ class TaskManagerController extends Controller
         return $this->render('sign-up', ['model' => $model, 'roles' => $roles]);
     }
 
-    public function actionSignIn()
-    {
-        $model = new SignInForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $identity = User::findOne(['email' => $model->email]);
-            if ($identity !== null && $identity->validatePassword($model->password_hash)) {
-                Yii::$app->session->setFlash('success', "Successfully sign in");
-                if (Yii::$app->user->login($identity)) {
-                    return $this->redirect(['task-manager/index']);
-                } else {
-                    Yii::$app->session->setFlash('error', "Invalid username");
-                }
-            } else {
-                Yii::$app->session->setFlash('error', "Invalid username or password");
-
-            }
-        }
-
-
-        return $this->render('sign-in', ['model' => $model]);
-
-    }
-    public function actionLogout()
-    {
-        Yii::$app->user->logout();
-        return $this->redirect(['task-manager/sign-in']);
-    }
-
     public function actionCreatePost()
     {
 
@@ -164,7 +179,7 @@ class TaskManagerController extends Controller
                 $filePath = uniqid() . '.' . $model->imageFile->extension;
 
                 foreach ($post_for_user as $userId) {
- 
+
                     $post_to_users = new PostToUsers();
                     $status = new StatusUpdate();
                     $status->type = 1;

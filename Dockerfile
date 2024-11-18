@@ -9,6 +9,8 @@ RUN apt-get update \
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY . /var/www/html
 RUN nginx -t
+RUN docker-php-ext-install pdo_mysql
+
 WORKDIR /var/www/html
 RUN chown -R www-data:www-data /var/www/html
 EXPOSE 80

@@ -2,7 +2,6 @@
 
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
-
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
@@ -14,6 +13,33 @@ $config = [
         '@npm' => '@vendor/npm-asset',
     ],
     'components' => [
+        "authClientCollection" => [
+            "class" => "yii\authclient\Collection",
+            "clients" => [
+                "keycloak" => [
+                    "class" => "yii\authclient\OpenIdConnect",
+                    "clientId" => 'task-manager-web',
+                    "clientSecret" => 'D2Sq7wizqi8X0YYpQg8qIFqHgcuAZ9pb',
+                    "returnUrl" => 'http://localhost:80/index.php?r=site/auth-callback',
+                    "issuerUrl" => 'http://192.168.3.86:8180/realms/task-manager/',
+                    "name" => "keycloak",
+                    "validateAuthState" => true,
+                   
+                    "autoRefreshAccessToken" => true,
+                    "validateJws" => false,
+                    
+                    "stateStorage" => [
+                        "class" => "yii\authclient\SessionStateStorage",
+                        "session" => "session",
+                    ],
+                    "scope" => "openid profile",
+                ],
+            ],
+        ],
+
+
+
+
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => '9uv54-uvETwGqEWbK-9qq9hjRiLISSdw',
@@ -21,7 +47,7 @@ $config = [
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
-       
+
         'user' => [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,

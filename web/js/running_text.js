@@ -1,7 +1,6 @@
 let text = document.getElementsByClassName('subtext-link')
 let subtext = document.getElementsByClassName('subtext-text')
 
-//hhhf hhfhhf
 
 let html = document.getElementsByClassName('subtext-link');
 let html_subtext = document.getElementsByClassName('subtext-text');
@@ -13,7 +12,6 @@ function startRunningTitle() {
         let display = text[i].innerHTML;
         display = display.substring(1) + display[0];
         html[i].innerHTML = display.replaceAll(" ", '&amp;nbsp;');
-//hhhf&amp;nbsp;hhfhhf
 
 
     }
