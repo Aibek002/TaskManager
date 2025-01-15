@@ -488,11 +488,24 @@ main>.container {
     right: 50px;
 }
 
-.subtext-link{
+.subtext-link {
     overflow: hidden;
     white-space: nowrap;
 }
-.subtext-text{
+
+.subtext-text {
     overflow: hidden;
-    white-space: nowrap; 
+    white-space: nowrap;
+}
+
+.flex-checkbox {
+    height: 200px;
+    width: 12 vb0px;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    gap: 5px;
+}
+.btn-check, .btn.btn-primary{
+    width: 100px;
 }

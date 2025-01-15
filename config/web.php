@@ -21,7 +21,7 @@ $config = [
                     "clientId" => 'task-manager-web',
                     "clientSecret" => 'D2Sq7wizqi8X0YYpQg8qIFqHgcuAZ9pb',
                     "returnUrl" => 'http://localhost:80/index.php?r=site/auth-callback',
-                    "issuerUrl" => 'http://192.168.3.86:8180/realms/task-manager/',
+                    "issuerUrl" => 'http://localhost:8180/realms/task-manager/',
                     "name" => "keycloak",
                     "validateAuthState" => true,
                    
@@ -102,7 +102,7 @@ if (YII_ENV_DEV) {
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
-        //'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['127.0.0.1', '::1', '172.21.0.1'], 
     ];
 
     $config['bootstrap'][] = 'gii';

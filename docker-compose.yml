@@ -10,19 +10,19 @@ services:
       - "80:80"
     depends_on:
       - php-fpm
-      - data
+      - datas
 
   php-fpm:
     image: php:8.3-fpm
     volumes:
       - ./:/var/www/html # Application files
     depends_on:
-      - data
+      - datas
 
-  data:
+  datas:
     image: mysql:latest
 
-    container_name: data
+    container_name: datas
     environment:
 
       MYSQL_DATABASE: yii2basic
@@ -38,7 +38,7 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     environment:
-      PMA_HOST: data
+      PMA_HOST: datas
 
       MYSQL_PASSWORD: yii2basic
       MYSQL_ROOT_PASSWORD: yii2basic
@@ -46,7 +46,7 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - data
+      - datas
 
 volumes:
   db_data:

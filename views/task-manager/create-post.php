@@ -11,22 +11,35 @@ $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['task-manag
 
     <?php $form = ActiveForm::begin([
         'options' => [
-        'enctype' => 'multipart/form-data', 
-        'class' => 'form-input'
+            'enctype' => 'multipart/form-data',
+            'class' => 'form-input'
         ]
-        ]); ?>
+    ]); ?>
 
     <?= $form->field($model, 'title')->textInput(); ?>
     <?= $form->field($model, 'text')->textarea(); ?>
 
-    <?php foreach ($user as $users): ?>
+    <div class="flex-checkbox">
+        <?php foreach ($user as $users): ?>
 
-        <p>
-            <?= Html::checkbox('user[]', false, ['value' => $users->ID]) ?>
+            <!-- <input type="checkbox" class="btn-check" id="btn-check" autocomplete="off">
+            <label class="btn btn-primary" for="btn-check">Single toggle</label> -->
+            <?= Html::checkbox('user[]', false, [
+                'value' => $users->ID,
+                'class' => 'btn-check',
+                'id' => 'btn-check-' . $users->ID, // Уникальный ID для каждой кнопки
+                'autocomplete' => 'off'
+            ]) ?>
 
-            <?= Html::encode($users->name) ?>
-        </p>
-    <?php endforeach; ?>
+            <?= Html::label(
+                $users->name,
+                'btn-check-' . $users->ID,
+                ['class' => 'btn btn-primary']
+            ) ?>
+
+
+        <?php endforeach; ?>
+    </div>
     <?= $form->field($model, 'imageFile')->fileInput(); ?>
     <?= Html::submitButton('Отправить', ['class' => 'btn btn-primary']); ?>
     <!-- <table class="table">

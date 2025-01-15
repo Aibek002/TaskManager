@@ -2,16 +2,20 @@ let text = document.getElementsByClassName('subtext-link')
 let subtext = document.getElementsByClassName('subtext-text')
 
 
-let html = document.getElementsByClassName('subtext-link');
-let html_subtext = document.getElementsByClassName('subtext-text');
+
 
 function startRunningTitle() {
 
     for (let i = 0; i < text.length; i++) {
 
-        let display = text[i].innerHTML;
-        display = display.substring(1) + display[0];
-        html[i].innerHTML = display.replaceAll(" ", '&amp;nbsp;');
+        let title = text[i];
+
+        if (!title.currentText) {
+            title.currentText = title.innerHTML;
+        }
+
+        title.currentText = title.currentText.substring(1) + title.currentText[0];
+        title.innerHTML = title.currentText.replaceAll(" ", '&nbsp;');
 
 
     }
@@ -19,7 +23,7 @@ function startRunningTitle() {
 }
 
 function startRunningText() {
-    
+
     for (let i = 0; i < subtext.length; i++) {
         let element = subtext[i];
 
