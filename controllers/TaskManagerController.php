@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\CreateAvatarForm;
 use app\models\CreatePostForm;
 use app\models\DialogForm;
+use app\models\DialogRead;
 use app\models\Post;
 use app\models\PostToUsers;
 use app\models\SignInForm;
@@ -12,19 +13,65 @@ use app\models\SignUpForm;
 use app\models\StatusType;
 use app\models\StatusUpdate;
 use app\models\User;
+use PHPUnit\Framework\Constraint\IsEmpty;
 use Yii;
 use app\models\Users;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\UploadedFile;
+use yii\helpers\Url;
 
 class TaskManagerController extends Controller
 {
+    public function behaviors()
+    {
+        return [
+            "access" => [
+                "class" => \yii\filters\AccessControl::class,
+                "only" => ["logout", "index"],
+                "rules" => [
+                    // TODO(annad): Logout is post request!
+                    ["allow" => true, "actions" => ["index", "logout"], "roles" => ["@"]],
+                ],
+            ],
+        ];
+    }
+    public function actions()
+    {
+        return [
+            "error" => [
+                "class" => \yii\web\ErrorAction::class,
+            ],
+
+            "auth" => [
+                "class" => \yii\authclient\AuthAction::class,
+                "clientCollection" => "authClientCollection",
+            ],
+        ];
+    }
 
 
 
+    public function actionLogin()
+    {
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
+        $cli = Yii::$app->authClientCollection->getClient("keycloak");
+        $to = Url::to(["auth", "authclient" => $cli->getName()]);
+        return $this->redirect($to);
+        // print_r($cli);
+
+    }
+    public function actionLogout()
+    {
+        Yii::$app->user->logout();
+        return $this->redirect(['task-manager/sign-in']);
+    }
     public function actionIndex()
     {
+    //    echo phpinfo();
+        // echo xdebug_info();
         $status_type = StatusType::find()
             ->where(['!=', 'status_type', 'create'])
             ->andWhere(['!=', 'status_type', 'active'])
@@ -105,103 +152,115 @@ class TaskManagerController extends Controller
         return $this->render('sign-up', ['model' => $model, 'roles' => $roles]);
     }
 
-    public function actionSignIn()
-    {
-        $model = new SignInForm();
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-            $identity = User::findOne(['email' => $model->email]);
-            if ($identity !== null && $identity->validatePassword($model->password_hash)) {
-                Yii::$app->session->setFlash('success', "Successfully sign in");
-                if (Yii::$app->user->login($identity)) {
-                    return $this->redirect(['task-manager/index']);
-                } else {
-                    Yii::$app->session->setFlash('error', "Invalid username");
-                }
-            } else {
-                Yii::$app->session->setFlash('error', "Invalid username or password");
-
-            }
-        }
-
-
-        return $this->render('sign-in', ['model' => $model]);
-
-    }
-    public function actionLogout()
-    {
-        Yii::$app->user->logout();
-        return $this->redirect(['task-manager/sign-in']);
-    }
-
     public function actionCreatePost()
     {
-        $model = new CreatePostForm();
-        $user = User::find()->select(['id', 'name', 'email'])->all();
+        // Проверка прав пользователя на создание поста
+        if (Yii::$app->user->can('createPost')) {
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model = new CreatePostForm();
 
-            $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
-            // Сохраняем файл во временную директорию потому что гетИнстанс только один раз сохроняет изображение
-            $tempPath = Yii::getAlias('@webroot/') . uniqid() . $model->imageFile->extension;
-            $model->imageFile->saveAs($tempPath);
+            // Получаем пользователей, кроме текущего
+            $user = User::find()
+                ->select(['id', 'name', 'email'])
+                ->where(['!=', 'id', Yii::$app->user->id])
+                ->all();
 
-            // Убедитесь, что файл загружен
-            if (!$model->imageFile) {
-                Yii::$app->session->setFlash('error', 'Изображение не загружено.');
-                return $this->redirect(['task-manager/create-post']);
-            }
-            $post_for_user = Yii::$app->request->post('user', []);
-            $post = new Post();
-            $filePath = uniqid() . '.' . $model->imageFile->extension;
+            // Если форма успешно загружена и прошла валидацию
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
 
-            // Цикл по каждому пользователю
-            foreach ($post_for_user as $userId) {
+                // Получаем загруженный файл
+                $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
 
-                $post_to_users = new PostToUsers();
-                $status = new StatusUpdate();
-                $status->type = 1;
+                // Проверка, если файл не был загружен
+                if (!$model->imageFile) {
+                    Yii::$app->session->setFlash('error', 'Изображение не загружено.');
+                    return $this->redirect(['task-manager/create-post']);
+                }
 
-                // Создаем папки для каждого пользователя
-                $path = Yii::getAlias('@webroot/uploadImage/') . $userId;
-                if (!is_dir($path)) {
-                    if (mkdir($path, 0777, true)) {
-                        $path_subdirectory_pub = $path . "/publication";
-                        $path_subdirectory_ava = $path . "/avatar";
-                        mkdir($path_subdirectory_pub, 0777, true);
-                        mkdir($path_subdirectory_ava, 0777, true);
+                // Получаем пользователей, которым предназначен пост
+                $post_for_user = Yii::$app->request->post('user', []);
+                $post_for_user[] = Yii::$app->user->getId();
+                $post = new Post();
+                $filePath = uniqid() . '.' . $model->imageFile->extension;  // Генерация уникального имени файла
+                $tempPath = Yii::getAlias('@webroot/uploadImage/') . $filePath;  // Временный путь для файла
+
+                // Сохраняем файл во временную директорию
+                if (!$model->imageFile->saveAs($tempPath)) {
+                    Yii::$app->session->setFlash('error', 'Не удалось сохранить файл.');
+                    return $this->redirect(['task-manager/create-post']);
+                }
+
+                // Обрабатываем каждого пользователя
+                foreach ($post_for_user as $userId) {
+                    // Путь к директории пользователя
+                    $userPath = Yii::getAlias('@webroot/uploadImage/') . $userId;
+                    if (!is_dir($userPath)) {
+                        if (!mkdir($userPath, 0777, true)) {
+                            throw new \Exception("Не удалось создать директорию: $userPath");
+                        }
+                        mkdir($userPath . "/publication", 0777, true);
+                        mkdir($userPath . "/avatar", 0777, true);
+                    }
+
+                    // Создаем и сохраняем пост
+                    $post_to_users = new PostToUsers();
+                    $status = new StatusUpdate();
+                    $status->type = 1;
+
+                    $post->title = $model->title;
+                    $post->text = $model->text;
+                    $post->imagePath = $filePath;
+
+                    if ($post->save()) {
+                        // Сохраняем связь с пользователем и статус
+                        $status->task_id = $post->id;
+                        $post_to_users->user_id = $userId;
+                        $post_to_users->post_id = $post->id;
+                        $post_to_users->save();
+                        $status->save();
+                        $dialog = DialogForm::find()->where(['=', 'post_id', $post->id])->one();
+                        if (!$dialog) {
+                            $dialog = new DialogForm();
+                            $dialog->user_from = Yii::$app->user->getId();
+                            $dialog->comments = 'I created new post';
+                            $dialog->post_id = $post->id;
+                            $dialog->save();
+                        }
+                        // Путь к файлу пользователя
+                        $userImagePath = Yii::$app->params['uploadImagePath'] . $userId . '/publication/' . $filePath;
+
+                        // Перемещаем файл в директорию пользователя
+                        if (!copy($tempPath, $userImagePath)) {
+                            Yii::$app->session->setFlash('error', 'Ошибка при загрузке файла.');
+
+                            $lastError = error_get_last();
+                            if ($lastError) {
+                                Yii::error("Ошибка при перемещении файла: " . $lastError['message'], __METHOD__);
+                            } else {
+                                Yii::error("Ошибка при перемещении файла, причина неизвестна.", __METHOD__);
+                            }
+                        } else {
+                            Yii::$app->session->setFlash('success', 'Файл успешно загружен.');
+                        }
+
+
+
+                    } else {
+                        Yii::$app->session->setFlash('error', 'Ошибка при сохранении поста: ' . implode(', ', $post->getErrorSummary(true)));
                     }
                 }
-
-                // Генерация уникального имени файла
-                $savePath = Yii::$app->params['uploadImagePath'] . $userId . "/publication/" . $filePath;
-
-                // Присваиваем путь к изображению
-                $post->title = $model->title;
-                $post->text = $model->text;
-                $post->imagePath = $filePath;
-
-                if ($post->save()) {
-                    // Сохранение отношений между постом и пользователем
-                    $status->task_id = $post->id;
-                    $post_to_users->user_id = $userId;
-                    $post_to_users->post_id = $post->id;
-                    $post_to_users->save();
-                    $status->save();
-                    copy($tempPath, $savePath);
-
-                    // Сохранение изображения
-                } else {
-                    Yii::$app->session->setFlash('error', 'Ошибка при сохранении поста');
-                }
+                unlink($tempPath);
+                return $this->redirect(['task-manager/index']);
             }
-            // Удаляем временный файл
-            unlink($tempPath);
-            return $this->redirect(['task-manager/index']);
+
+        } else {
+            Yii::$app->session->setFlash('error', 'You cannot create post!');
         }
 
-
+        // Рендерим форму создания поста
         return $this->render('create-post', ['model' => $model, 'user' => $user]);
     }
+
     public function actionCreateAvatar()
     {
         function clearImageDirectoryUsingGlob($dir)
@@ -269,30 +328,27 @@ class TaskManagerController extends Controller
     }
     public function actionMoreInformationPosts($id)
     {
+
+
         $status_type = StatusType::find()
             ->where(['!=', 'status_type', 'create'])
             ->andWhere(['!=', 'status_type', 'active'])
             ->all();
         $model = new DialogForm();
+        $read_status = new DialogRead();
 
-        if ($model->load(Yii::$app->request->post())) {
-            $model->user_from = Yii::$app->user->id;
-            $model->post_id = $id;
-            if ($model->save()) {
-                return $this->refresh();
-            }
-        }
+
 
 
         // print_r($model);
-        $sql = 'SELECT p.title, p.text, p.imagePath, s.task_id, s.status_date, status_type.status_type
-                    FROM post AS p 
-                    LEFT JOIN status AS s ON (s.task_id = p.id) 
-                    LEFT JOIN status_type ON (status_type.id = s.type) 
-                    
-                    WHERE 
-                    p.id = :id_post 
-                    AND  :user_id IN (SELECT user_id FROM post_to_users WHERE post_id = :id_post)';
+        $sql = 'SELECT p.title, p.text, p.imagePath, s.task_id, MAX(s.status_date) AS status_date, status_type.status_type
+                FROM post AS p 
+                LEFT JOIN status AS s ON (s.task_id = p.id) 
+                LEFT JOIN status_type ON (status_type.id = s.type) 
+                WHERE 
+                p.id = :id_post
+                AND :user_id IN (SELECT user_id FROM post_to_users WHERE post_id = :id_post)
+                GROUP BY p.title, p.text, p.imagePath, s.task_id, status_type.status_type;';
         $post = Yii::$app->db->createCommand(
             $sql,
             [
@@ -303,15 +359,67 @@ class TaskManagerController extends Controller
         )->queryAll();
         // print_r($post);
 
-        $sql_request_for_dialog = 'SELECT dialog.*,user.name,user.surname FROM dialog
-        LEFT JOIN user on (user.id=dialog.user_from) WHERE dialog.post_id=:id_post';
+        $sql_request_for_dialog = 'SELECT dialog.*, user.name, user.surname , user.id FROM dialog
+        LEFT JOIN user on ( user.id = dialog.user_from ) WHERE dialog.post_id = :id_post';
         $dialog = Yii::$app->db->createCommand(
             $sql_request_for_dialog,
             [
                 ':id_post' => $id,
             ]
         )->queryAll();
+        // print_r($id . ' id');
+
+        if ($model->load(Yii::$app->request->post())) {
+            $model->user_from = Yii::$app->user->id;
+            $model->post_id = $id;
+            if ($model->save()) {
+                $sql_request_for_get_post_to_users = 'SELECT post_to_users.user_id FROM post_to_users WHERE user_id != :user_id AND post_id=:post_id';
+                $users_post = Yii::$app->db->createCommand(
+                    $sql_request_for_get_post_to_users,
+                    [
+                        ':user_id' => Yii::$app->user->id,
+                        ':post_id' => $id
+                    ]
+                )->queryAll();
+                // print_r($users_post);
+                foreach ($users_post as $i => $users) {
+                    $read_status->dialog_id = $model->dialog_id;
+                    $read_status->read = 0;
+                    $read_status->user_to = $users['user_id'];
+                    if (!$read_status->save()) {
+                        Yii::$app->session->setFlash('error', 'status not fixed');
+                    }
+                }
+
+
+                return $this->refresh();
+            }
+        }
+        $sql = 'SELECT dialog_read.read FROM dialog_read WHERE user_to = :user_id AND dialog_read.read = 0';
+        $get_status = Yii::$app->db->createCommand(
+            $sql,
+            [':user_id' => Yii::$app->user->id]
+        )->queryAll();
+        // print_r($get_status);
+        if (isset($get_status)) {
+            $sql = 'UPDATE dialog_read SET dialog_read.read = 1 where user_to = :user_id';
+            $update_status_read = Yii::$app->db->createCommand(
+                $sql,
+                [':user_id' => Yii::$app->user->id]
+            )->execute();
+
+        }
+        $lastRead = (count($dialog) - 1) >= 1 ? (count($dialog) - 1) : 0;
         // print_r($dialog);
-        return $this->render('more-information-posts', ['post' => $post, 'status_type' => $status_type, 'comments' => $dialog, 'model' => $model]);
+
+
+        $sql = 'SELECT dialog_read.read, user.name from dialog_read 
+        Left join user on ( user.id =  dialog_read.user_to ) where dialog_read.dialog_id = :dialog_id';
+        $get_read_user = Yii::$app->db->createCommand(
+            $sql,
+            [':dialog_id' => $dialog[$lastRead]['dialog_id']]
+        )->queryAll();
+        // print_r($get_read_user);
+        return $this->render('more-information-posts', ['post' => $post, 'status_type' => $status_type, 'comments' => $dialog, 'model' => $model, 'read' => $get_read_user]);
     }
 }

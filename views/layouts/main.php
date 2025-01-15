@@ -48,19 +48,22 @@ $avatar = CreateAvatarForm::findOne(['id_user' => Yii::$app->user->id]);
                 <a href="<?= Url::to(['task-manager/users']) ?>" class="header-menu-link nav-link">Список
                     пользователей</a>
             </li>
-            <li class="nav-item">
-                <a href="<?= Url::to(['task-manager/create-post']) ?>" class="header-menu-link nav-link">Создать</a>
-            </li>
+            <?php if (Yii::$app->user->can('createPost')): ?>
+                <li class="nav-item">
+                    <a href="<?= Url::to(['task-manager/create-post']) ?>" class="header-menu-link nav-link">Создать</a>
+                </li>
+            <?php endif ?>
 
             <li class="nav-item">
                 <?php if (!Yii::$app->user->isGuest): ?>
                 <li>
-                  
-                        <?php if (isset($avatar)): ?>
-                             <a class='header-menu-link nav-link' href="<?= Url::to(['task-manager/create-avatar']) ?>"> <img style="width: 30px; height: 30px; border-radius: 100%;"
-                                src="<?= Url::to( 
-                                Yii::$app->params['printImageTask'] . Yii::$app->user->id . '/avatar/' . $avatar->fileName) ?>"
-                                alt=""></a>
+
+                    <?php if (isset($avatar)): ?>
+                        <a class='header-menu-link nav-link' href="<?= Url::to(['task-manager/create-avatar']) ?>"> <img
+                                style="width: 30px; height: 30px; border-radius: 100%;"
+                                src="<?= Url::to(
+                                    Yii::$app->params['printImageTask'] . Yii::$app->user->id . '/avatar/' . $avatar->fileName
+                                ) ?>" alt=""></a>
                     <?php else: ?>
                         <?= Html::a(
                             Html::encode(Yii::$app->user->identity->name),
